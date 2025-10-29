@@ -1,0 +1,136 @@
+# =========================
+# Java / Spring Boot
+# =========================
+# Gradle
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+*.iml38
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+*.swp
+*~.nib
+*.sublime-workspace
+*.sublime-project
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+logs/
+
+# Blueprints
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =========================
+# Vue / Node.js 前端
+# =========================
+# Node modules
+node_modules/
+
+# npm/yarn/pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Vue CLI
+.vue-cli/
+.env.local
+.env.*.local
+
+# Vite
+vite.config.js.timestamp-*
+.vite/
+
+# =========================
+# 微服务常见
+# =========================
+# Docker
+Dockerfile*
+.dockerignore
+.docker/
+
+# Kubernetes / Helm
+*.yaml
+*.yml
+k8s/
+helm/
+
+# 数据库/本地测试
+*.db
+*.sqlite3
+*.h2.db
+
+# 应用本地配置
+application-local.yml
+application-local.yaml
+application-dev.yml
+application-dev.yaml
+
+# =========================
+# 其他
+# =========================
+# 临时文件
+*.tmp
+*.temp
+*.cache
+*.bak
+*.orig
+
+# 打包产物
+*.jar
+*.war
+*.ear
+
+# Maven wrapper
+!**/src/main/**/wrapper/maven-wrapper.jar
+!**/src/test/**/wrapper/maven-wrapper.jar
+
+# Gradle wrapper
+!gradle/wrapper/gradle-wrapper.properties
+
+# Spring Boot DevTools
+.springBoot/
+
+# 个人笔记
+*.md
+README*.md
+TODO*

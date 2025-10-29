@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sangui.sanguimall.product.mapper.AttrMapper">
+  <resultMap id="BaseResultMap" type="com.sangui.sanguimall.product.model.entity.AttrDo">
+    <id column="attr_id" jdbcType="BIGINT" property="attrId" />
+    <result column="attr_name" jdbcType="CHAR" property="attrName" />
+    <result column="search_type" jdbcType="TINYINT" property="searchType" />
+    <result column="value_type" jdbcType="TINYINT" property="valueType" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="value_select" jdbcType="CHAR" property="valueSelect" />
+    <result column="attr_type" jdbcType="TINYINT" property="attrType" />
+    <result column="enable" jdbcType="BIGINT" property="enable" />
+    <result column="catelog_id" jdbcType="BIGINT" property="catelogId" />
+    <result column="show_desc" jdbcType="TINYINT" property="showDesc" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    attr_id, attr_name, search_type, value_type, icon, value_select, attr_type, `enable`, 
+    catelog_id, show_desc
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pms_attr
+    where attr_id = #{attrId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from pms_attr
+    where attr_id = #{attrId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="attr_id" keyProperty="attrId" parameterType="com.sangui.sanguimall.product.model.entity.AttrDo" useGeneratedKeys="true">
+    insert into pms_attr (attr_name, search_type, value_type, 
+      icon, value_select, attr_type, 
+      `enable`, catelog_id, show_desc
+      )
+    values (#{attrName,jdbcType=CHAR}, #{searchType,jdbcType=TINYINT}, #{valueType,jdbcType=TINYINT}, 
+      #{icon,jdbcType=VARCHAR}, #{valueSelect,jdbcType=CHAR}, #{attrType,jdbcType=TINYINT}, 
+      #{enable,jdbcType=BIGINT}, #{catelogId,jdbcType=BIGINT}, #{showDesc,jdbcType=TINYINT}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="attr_id" keyProperty="attrId" parameterType="com.sangui.sanguimall.product.model.entity.AttrDo" useGeneratedKeys="true">
+    insert into pms_attr
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="attrName != null">
+        attr_name,
+      </if>
+      <if test="searchType != null">
+        search_type,
+      </if>
+      <if test="valueType != null">
+        value_type,
+      </if>
+      <if test="icon != null">
+        icon,
+      </if>
+      <if test="valueSelect != null">
+        value_select,
+      </if>
+      <if test="attrType != null">
+        attr_type,
+      </if>
+      <if test="enable != null">
+        `enable`,
+      </if>
+      <if test="catelogId != null">
+        catelog_id,
+      </if>
+      <if test="showDesc != null">
+        show_desc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="attrName != null">
+        #{attrName,jdbcType=CHAR},
+      </if>
+      <if test="searchType != null">
+        #{searchType,jdbcType=TINYINT},
+      </if>
+      <if test="valueType != null">
+        #{valueType,jdbcType=TINYINT},
+      </if>
+      <if test="icon != null">
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="valueSelect != null">
+        #{valueSelect,jdbcType=CHAR},
+      </if>
+      <if test="attrType != null">
+        #{attrType,jdbcType=TINYINT},
+      </if>
+      <if test="enable != null">
+        #{enable,jdbcType=BIGINT},
+      </if>
+      <if test="catelogId != null">
+        #{catelogId,jdbcType=BIGINT},
+      </if>
+      <if test="showDesc != null">
+        #{showDesc,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sangui.sanguimall.product.model.entity.AttrDo">
+    update pms_attr
+    <set>
+      <if test="attrName != null">
+        attr_name = #{attrName,jdbcType=CHAR},
+      </if>
+      <if test="searchType != null">
+        search_type = #{searchType,jdbcType=TINYINT},
+      </if>
+      <if test="valueType != null">
+        value_type = #{valueType,jdbcType=TINYINT},
+      </if>
+      <if test="icon != null">
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="valueSelect != null">
+        value_select = #{valueSelect,jdbcType=CHAR},
+      </if>
+      <if test="attrType != null">
+        attr_type = #{attrType,jdbcType=TINYINT},
+      </if>
+      <if test="enable != null">
+        `enable` = #{enable,jdbcType=BIGINT},
+      </if>
+      <if test="catelogId != null">
+        catelog_id = #{catelogId,jdbcType=BIGINT},
+      </if>
+      <if test="showDesc != null">
+        show_desc = #{showDesc,jdbcType=TINYINT},
+      </if>
+    </set>
+    where attr_id = #{attrId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sangui.sanguimall.product.model.entity.AttrDo">
+    update pms_attr
+    set attr_name = #{attrName,jdbcType=CHAR},
+      search_type = #{searchType,jdbcType=TINYINT},
+      value_type = #{valueType,jdbcType=TINYINT},
+      icon = #{icon,jdbcType=VARCHAR},
+      value_select = #{valueSelect,jdbcType=CHAR},
+      attr_type = #{attrType,jdbcType=TINYINT},
+      `enable` = #{enable,jdbcType=BIGINT},
+      catelog_id = #{catelogId,jdbcType=BIGINT},
+      show_desc = #{showDesc,jdbcType=TINYINT}
+    where attr_id = #{attrId,jdbcType=BIGINT}
+  </update>
+</mapper>

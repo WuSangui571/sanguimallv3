@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sangui.sanguimall.product.mapper.SpuInfoDescMapper">
+  <resultMap id="BaseResultMap" type="com.sangui.sanguimall.product.model.entity.SpuInfoDescDo">
+    <id column="spu_id" jdbcType="BIGINT" property="spuId" />
+    <result column="decript" jdbcType="VARCHAR" property="decript" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    spu_id, decript
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pms_spu_info_desc
+    where spu_id = #{spuId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from pms_spu_info_desc
+    where spu_id = #{spuId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="spu_id" keyProperty="spuId" parameterType="com.sangui.sanguimall.product.model.entity.SpuInfoDescDo" useGeneratedKeys="true">
+    insert into pms_spu_info_desc (decript)
+    values (#{decript,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyColumn="spu_id" keyProperty="spuId" parameterType="com.sangui.sanguimall.product.model.entity.SpuInfoDescDo" useGeneratedKeys="true">
+    insert into pms_spu_info_desc
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="decript != null">
+        decript,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="decript != null">
+        #{decript,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sangui.sanguimall.product.model.entity.SpuInfoDescDo">
+    update pms_spu_info_desc
+    <set>
+      <if test="decript != null">
+        decript = #{decript,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where spu_id = #{spuId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sangui.sanguimall.product.model.entity.SpuInfoDescDo">
+    update pms_spu_info_desc
+    set decript = #{decript,jdbcType=VARCHAR}
+    where spu_id = #{spuId,jdbcType=BIGINT}
+  </update>
+</mapper>
