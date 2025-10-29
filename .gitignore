@@ -131,6 +131,4 @@ application-dev.yaml
 .springBoot/
 
 # ¸öÈË±Ê¼Ç
-*.md
-README*.md
 TODO*
