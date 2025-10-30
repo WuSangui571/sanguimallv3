@@ -33,7 +33,7 @@
     delete from pms_category
     where cat_id = #{catId,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" keyColumn="cat_id" keyProperty="catId" parameterType="com.sangui.sanguimall.product.model.entity.CategoryDo" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="cat_id" keyProperty="catId" parameterType="com.sangui.sanguimall.product.model.entity.CategoryDo" useGeneratedKeys="true" >
     insert into pms_category (`name`, parent_cid, cat_level, 
       show_status, sort, icon, 
       product_unit, product_count)

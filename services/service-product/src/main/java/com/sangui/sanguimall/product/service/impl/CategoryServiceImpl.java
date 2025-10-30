@@ -4,11 +4,10 @@ package com.sangui.sanguimall.product.service.impl;
 import com.sangui.sanguimall.product.mapper.CategoryMapper;
 import com.sangui.sanguimall.product.model.converter.CategoryConverter;
 import com.sangui.sanguimall.product.model.entity.CategoryDo;
+import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,33 +33,31 @@ public class CategoryServiceImpl implements CategoryService {
         List<CategoryVo> result = new ArrayList<>();
         for (CategoryDo categoryDo: categoryDoList){
             if (categoryDo.getShowStatus() == 1){
-//                CategoryVo categoryVo = new CategoryVo();
-//                BeanUtils.copyProperties(categoryDo,categoryVo);
                 CategoryVo categoryVo = categoryConverter.doToVo(categoryDo);
                 if (categoryDo.getCatLevel() == 1){
-                    categoryVo.setChildList(new ArrayList<>());
+                    categoryVo.setChildren(new ArrayList<>());
                     result.add(categoryVo);
                     continue;
                 }
                 if (categoryDo.getCatLevel() == 2){
-                    categoryVo.setChildList(new ArrayList<>());
+                    categoryVo.setChildren(new ArrayList<>());
                     for (CategoryVo item:result){
-                        if (item.getCatId().equals(categoryDo.getParentCid())){
-                            List<CategoryVo> tempList = item.getChildList();
+                        if (item.getId().equals(categoryDo.getParentCid())){
+                            List<CategoryVo> tempList = item.getChildren();
                             tempList.add(categoryVo);
-                            item.setChildList(tempList);
+                            item.setChildren(tempList);
                         }
                     }
                     continue;
                 }
                 if (categoryDo.getCatLevel() == 3){
-                    categoryVo.setChildList(null);
+                    categoryVo.setChildren(null);
                     for (CategoryVo item:result){
-                        for (CategoryVo item2:item.getChildList()){
-                            if (item2.getCatId().equals(categoryDo.getParentCid())){
-                                List<CategoryVo> tempList = item2.getChildList();
+                        for (CategoryVo item2:item.getChildren()){
+                            if (item2.getId().equals(categoryDo.getParentCid())){
+                                List<CategoryVo> tempList = item2.getChildren();
                                 tempList.add(categoryVo);
-                                item2.setChildList(tempList);
+                                item2.setChildren(tempList);
                             }
                         }
                     }
@@ -68,5 +65,26 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         return result;
+    }
+
+    @Override
+    public CategoryVo addCategory(CategoryQuery categoryQuery) {
+        //System.out.println(categoryQuery);
+        CategoryDo parentCategoryDo = categoryMapper.selectByPrimaryKey(categoryQuery.getParentId());
+        CategoryDo newNodeCategoryDo = new CategoryDo();
+        newNodeCategoryDo.setName(categoryQuery.getNewNodeLabel());
+        newNodeCategoryDo.setParentCid(parentCategoryDo.getCatId());
+        newNodeCategoryDo.setCatLevel(parentCategoryDo.getCatLevel() + 1);
+        newNodeCategoryDo.setShowStatus((byte) 1);
+        newNodeCategoryDo.setSort(0);
+        newNodeCategoryDo.setProductCount(0);
+        categoryMapper.insert(newNodeCategoryDo);
+        //System.out.println(newNodeCategoryDo);
+        return categoryConverter.doToVo(categoryMapper.selectByPrimaryKey(newNodeCategoryDo.getCatId()));
+    }
+
+    @Override
+    public int delCategoryByCatId(Long catId) {
+        return categoryMapper.deleteByPrimaryKey(catId);
     }
 }

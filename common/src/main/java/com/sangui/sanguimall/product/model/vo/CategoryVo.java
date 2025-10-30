@@ -15,17 +15,22 @@ import java.util.List;
 @Data
 public class CategoryVo implements Serializable {
     /**
-     * 分类id
+     * 对应 CategoryDO 里的 catId 属性，即分类 id
      */
     private Long id;
 
     /**
-     * 分类名称
+     * 对应 CategoryDO 里的 name 属性，即分类名称
      */
     private String label;
 
     /**
-     * 孩子分类
+     * 对应 CategoryDO 里的 catLevel 属性，即层级
      */
-    private List<CategoryVo> childList;
+    private Integer level;
+
+    /**
+     * 无 CategoryDO 里的对应
+     */
+    private List<CategoryVo> children;
 }

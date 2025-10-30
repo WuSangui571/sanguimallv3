@@ -70,7 +70,7 @@
       <!--上导航条结束-->
       <!--主区域开始-->
       <el-main>
-        <router-view/>
+        <router-view v-if="isRouterAlive"/>
       </el-main>
       <!--主区域结束-->
       <!--底部版权信息条开始-->
@@ -92,6 +92,18 @@ export default defineComponent({
       isCollapse: false,
       // 当前访问路径，默认为空
       currentRouterPath:"",
+      // 控制该区域页面内容是否显示
+      isRouterAlive: true,
+    }
+  },
+  provide() {
+    return {
+      reload: () => {
+        this.isRouterAlive = false;
+        this.$nextTick(function () {
+          this.isRouterAlive = true;
+        })
+      }
     }
   },
   mounted() {

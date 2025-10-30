@@ -2,6 +2,7 @@ package com.sangui.sanguimall.product.service;
 
 
 import com.sangui.sanguimall.product.model.entity.CategoryDo;
+import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 
 import java.util.List;
@@ -14,4 +15,8 @@ import java.util.List;
  */
 public interface CategoryService {
     List<CategoryVo> listWithTree();
+
+    CategoryVo addCategory(CategoryQuery categoryQuery);
+
+    int delCategoryByCatId(Long catId);
 }

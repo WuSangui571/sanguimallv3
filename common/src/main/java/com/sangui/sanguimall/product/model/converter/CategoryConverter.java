@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
 
 /**
  * @Author: sangui
@@ -17,19 +16,15 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface CategoryConverter {
-    CategoryConverter INSTANCE = Mappers.getMapper(CategoryConverter.class);
+    //CategoryConverter INSTANCE = Mappers.getMapper(CategoryConverter.class);
 
     /**
      * DO → VO
-     * childList 由 Service 手动填充，避免递归死循环
      */
-
-    @Mapping(source = "catId", target = "id")
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "id",source = "catId")
     @Mapping(source = "name", target = "label")
-    @Mapping(target = "childList", ignore = true)
-//    @Mapping(source = "id", target = "catId")
-//    @Mapping(source = "label", target = "name")
+    @Mapping(source = "catLevel", target = "level")
     CategoryVo doToVo(CategoryDo categoryDo);
 
-    //List<CategoryVo> doListToVoList(List<CategoryDo> categoryDos);
 }

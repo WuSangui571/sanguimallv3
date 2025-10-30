@@ -1,16 +1,12 @@
 package com.sangui.sanguimall.product.web;
 
 
-import com.sangui.sanguimall.product.model.entity.CategoryDo;
+import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +32,18 @@ public class CategoryController {
     public R test(){
         System.out.println("pass");
         return R.ok(123);
+    }
+
+    @PostMapping("/add")
+    public R add(CategoryQuery categoryQuery){
+        //System.out.println(categoryQuery);
+        CategoryVo categoryVo = categoryService.addCategory(categoryQuery);
+        return R.ok(categoryVo);
+    }
+
+    @DeleteMapping("/del/{catId}")
+    public R del(@PathVariable("catId") Long catId){
+        int count = categoryService.delCategoryByCatId(catId);
+        return count >= 1 ? R.ok() : R.fail();
     }
 }

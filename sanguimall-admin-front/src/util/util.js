@@ -1,4 +1,5 @@
 import {ElMessage, ElMessageBox} from "element-plus";
+import {watch} from "vue";
 
 /**
  * 消息提示工具方法
@@ -45,6 +46,15 @@ export function removeToken(){
  * @param msg 消息信息详情
  * @param title 消息标题
  * @returns {Promise<MessageBoxData>}
+ *
+ * 具体使用：
+ * messageConfirm("确定删除吗？","警告").then(() => {
+ *   // 具体删除的代码......
+ * }).catch(() => {
+ *   // 用户点击取消就会触发 catch 里
+ *   messageTip("已取消删除！", "error")
+ * })
+ *
  */
 export function messageConfirm(msg,title){
     return ElMessageBox.confirm(
@@ -88,4 +98,46 @@ export function getToken() {
                 messageTip("已取消去登录！", "warning")
             })
     }
+}
+
+/**
+ * 等待某个响应式条件满足再继续
+ * @param conditionFn 返回布尔值的函数或响应式数据
+ * @param interval 可选轮询间隔 ms，仅在非响应式数据时生效
+ *
+ * 具体使用方法：
+ * // 方法前面加上 async
+ * async myFunction(){
+ *     // do something...
+ *
+ *     // 等待 abc 变量变为 true 才会执行后面的代码
+ *     await waitFor(() => this.abc === true)
+ *
+ *     // do other thing...
+ * }
+ */
+export function waitFor(conditionFn, interval = 50) {
+    return new Promise((resolve) => {
+        // 如果是函数，使用 watch 监听其值
+        if (typeof conditionFn === 'function') {
+            const stop = watch(
+                conditionFn,
+                (newVal) => {
+                    if (newVal) {
+                        stop()
+                        resolve()
+                    }
+                },
+                { immediate: true }
+            )
+        } else {
+            // 非函数，轮询检查（兼容非响应式数据）
+            const timer = setInterval(() => {
+                if (!unref(conditionFn)) {
+                    clearInterval(timer)
+                    resolve()
+                }
+            }, interval)
+        }
+    })
 }
