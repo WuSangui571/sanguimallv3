@@ -3,7 +3,9 @@
     <!--左侧导航栏开始-->
     <el-aside :width="isCollapse?'64px':'200px'">
       <div class="menu-title">
-        @sanguimall 后台管理系统
+        <el-icon class="fold-icon" @click="foldLeftSide">
+          <Fold/>
+        </el-icon>
       </div>
       <!--侧导航条-->
       <el-menu
@@ -15,25 +17,35 @@
           :default-active="currentRouterPath"
           :router="true">
         <el-menu-item index="/dashboard">
-          <el-icon><HomeFilled /></el-icon>
+          <el-icon>
+            <HomeFilled/>
+          </el-icon>
           <span>系统首页</span>
         </el-menu-item>
         <el-sub-menu index="3">
           <template #title>
-            <el-icon><Box /></el-icon>
+            <el-icon>
+              <Box/>
+            </el-icon>
             <span>商品系统</span>
           </template>
           <el-menu-item index="/dashboard/product/category">
-            <el-icon><Menu /></el-icon>
+            <el-icon>
+              <Menu/>
+            </el-icon>
             分类维护
           </el-menu-item>
           <el-menu-item index="3-2">
-            <el-icon><CollectionTag /></el-icon>
+            <el-icon>
+              <CollectionTag/>
+            </el-icon>
             品牌管理
           </el-menu-item>
           <el-sub-menu index="3-3">
             <template #title>
-              <el-icon><Monitor /></el-icon>
+              <el-icon>
+                <Monitor/>
+              </el-icon>
               平台属性
             </template>
             <el-menu-item index="3-3-1">
@@ -48,7 +60,9 @@
           </el-sub-menu>
           <el-sub-menu index="3-4">
             <template #title>
-              <el-icon><Management /></el-icon>
+              <el-icon>
+                <Management/>
+              </el-icon>
               商品维护
             </template>
             <el-menu-item index="3-4-1">spu维护</el-menu-item>
@@ -64,8 +78,19 @@
     <el-container class="right-side">
       <!--上导航条开始-->
       <el-header>
-        <el-icon class="fold-icon" @click="foldLeftSide"><Fold /></el-icon>
-        Header
+        <el-dropdown :hide-on-click="false">
+          <span class="el-dropdown-link">
+            此处动态获取用户姓名
+            <el-icon class="el-icon--right"><arrow-down/></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item>我的资料</el-dropdown-item>
+              <el-dropdown-item>修改密码</el-dropdown-item>
+              <el-dropdown-item divided>退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </el-header>
       <!--上导航条结束-->
       <!--主区域开始-->
@@ -85,13 +110,14 @@
 
 <script>
 import {defineComponent} from 'vue'
+
 export default defineComponent({
   name: "DashboardView",
-  data(){
+  data() {
     return {
       isCollapse: false,
       // 当前访问路径，默认为空
-      currentRouterPath:"",
+      currentRouterPath: "",
       // 控制该区域页面内容是否显示
       isRouterAlive: true,
     }
@@ -112,11 +138,11 @@ export default defineComponent({
   },
   methods: {
     // 折叠左侧菜单的方法
-    foldLeftSide(){
+    foldLeftSide() {
       this.isCollapse = !this.isCollapse;
     },
     // 获取当前路径地址
-    loadCurrentRouterPath(){
+    loadCurrentRouterPath() {
       let path = this.$route.path;
       //alert(path)
       let pathArr = path.split("/");
@@ -131,7 +157,7 @@ export default defineComponent({
 
 <style scoped>
 /* 设置上导航条的样式*/
-.el-header{
+.el-header {
   /* 设置背景颜色*/
   background-color: azure;
   /* 设置高度*/
@@ -139,8 +165,9 @@ export default defineComponent({
   /* 设置行高与高度一致，即可上下居中*/
   line-height: 35px;
 }
+
 /* 底部版权信息条的样式*/
-.el-footer{
+.el-footer {
   /* 设置背景颜色*/
   background-color: azure;
   /* 设置高度*/
@@ -150,13 +177,15 @@ export default defineComponent({
   /* 设置文本左右居中*/
   text-align: center;
 }
+
 /* 设置右侧三栏的样式*/
-.right-side{
+.right-side {
   /* 设置高度是撑满*/
   height: calc(100vh);
 }
+
 /* 设置菜单标题的样式*/
-.menu-title{
+.menu-title {
   /* 设置背景颜色*/
   background-color: azure;
   /* 设置高度和右边一样*/
@@ -166,13 +195,21 @@ export default defineComponent({
   /* 设置行高与高度一致，即可上下居中*/
   line-height: 35px;
 }
+
 /* 设置菜单的样式*/
-.el-menu{
+.el-menu {
   /* 发现菜单天然有个 1px 的右边框，设置无边框*/
   border-right: 0;
 }
+/* 设置用户姓名下拉列表的样式*/
+.el-dropdown{
+  /* 往右漂移，即放在最右边*/
+  float: right;
+  /* 设置行高与高度一致，即可上下居中*/
+  line-height: 35px;
+}
 /* 设置折叠图标的样式*/
-.fold-icon{
+.fold-icon {
   /* 使鼠标悬停图标时，鼠标变成手*/
   cursor: pointer;
 }
