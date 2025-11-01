@@ -2,6 +2,7 @@ package com.sangui.sanguimall.product.web;
 
 
 import com.sangui.sanguimall.product.model.query.CategoryQuery;
+import com.sangui.sanguimall.product.model.vo.CategorySequenceQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;
 import com.sangui.sanguimall.result.R;
@@ -46,4 +47,17 @@ public class CategoryController {
         int count = categoryService.delCategoryByCatId(catId);
         return count >= 1 ? R.ok() : R.fail();
     }
+
+    @PutMapping("/edit")
+    public R edit(CategoryQuery categoryQuery){
+        int count = categoryService.editCategory(categoryQuery);
+        return count >= 1 ? R.ok() : R.fail();
+    }
+
+    @PutMapping("/sequence/edit")
+    public R sequenceEdit(CategorySequenceQuery categorySequenceQuery){
+        int count = categoryService.editCategorySequence(categorySequenceQuery);
+        return count >= 1 ? R.ok() : R.fail();
+    }
+
 }

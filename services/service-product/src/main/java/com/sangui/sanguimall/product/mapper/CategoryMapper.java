@@ -21,4 +21,6 @@ public interface CategoryMapper {
     int updateByPrimaryKey(CategoryDo record);
 
     List<CategoryDo> selectAll();
+
+    List<CategoryDo> selectBySameParent(Long parentCid);
 }
