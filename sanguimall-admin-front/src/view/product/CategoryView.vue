@@ -101,7 +101,6 @@ export default defineComponent({
       maxLevel: 0,
     }
   },
-
   mounted() {
     this.getData();
   },

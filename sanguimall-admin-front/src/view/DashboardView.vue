@@ -16,7 +16,7 @@
           :collapse-transition="false"
           :default-active="currentRouterPath"
           :router="true">
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/dashboard/index">
           <el-icon>
             <HomeFilled/>
           </el-icon>
@@ -69,6 +69,21 @@
             <el-menu-item index="3-4-2">发表商品</el-menu-item>
             <el-menu-item index="3-4-3">商品管理</el-menu-item>
           </el-sub-menu>
+        </el-sub-menu>
+        <el-sub-menu index="4">
+          <template #title>
+            <el-icon><UserFilled /></el-icon>
+            <span>用户管理</span>
+          </template>
+          <el-menu-item index="/dashboard/admin/sysUsers">
+            <el-icon><Grid /></el-icon>
+            所有用户
+          </el-menu-item>
+          <el-menu-item :index='personalUrl'>
+            <el-icon><User /></el-icon>
+            个人信息
+          </el-menu-item>
+
         </el-sub-menu>
 
       </el-menu>
@@ -126,6 +141,7 @@ export default defineComponent({
       currentRouterPath: "",
       // 控制该区域页面内容是否显示
       isRouterAlive: true,
+      personalUrl:'',
     }
   },
   provide() {
@@ -144,6 +160,7 @@ export default defineComponent({
     this.loadLoginUser();
   },
   methods: {
+
     // 退出登录的方法
     logout(){
       doGet("/api/admin/sysUser/logout",{}).then((resp) =>{
@@ -168,9 +185,11 @@ export default defineComponent({
       // 发送给后端请求，请求当前登录用户
       doGet("/api/admin/sysUser/info",{}).then((resp) =>{
         // 看看响应的形式是怎么样的
-        // console.log(resp);
+        console.log(resp);
         // console.log(resp.data.data.name);
         this.user = resp.data.data;
+        this.personalUrl = "/dashboard/admin/sysUser/" + resp.data.data.userId;
+        console.log(this.personalUrl);
       })
     },
     // 折叠左侧菜单的方法

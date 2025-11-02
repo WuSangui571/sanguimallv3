@@ -13,20 +13,54 @@ let router = createRouter({
             path: "/",
             // 路由路径所对应的页面（此文件目录为：~/src/view/LoginView.vue）
             component: () => import("../view/LoginView.vue"),
+            // children: [
+            //     {
+            //         // 子路由里面的每一个组件，都是和路由一样，path 和 component
+            //         // 唯一的区别是，子路由的 path 不能带斜杠
+            //         path: "index",
+            //         component: () => import("../view/IndexView.vue"),
+            //     },
+            // ]
         },
         {
-           // 路由路径
-           path: "/dashboard",
-           // 路由路径所对应的页面（此文件目录为：~/src/view/DashboardView.vue）
-           component: () => import("../view/DashboardView.vue"),
+            // 路由路径
+            path: "/dashboard",
+            // 路由路径所对应的页面（此文件目录为：~/src/view/DashboardView.vue）
+            component: () => import("../view/DashboardView.vue"),
+            redirect: "/dashboard/index", // 自动跳转，默认不进入 /dashboard 页面，直接跳转到首页
             // 子路由，子路由可以是多个，所以是数组
             children: [
                 {
                     // 子路由里面的每一个组件，都是和路由一样，path 和 component
                     // 唯一的区别是，子路由的 path 不能带斜杠
+                    path: "index",
+                    component: () => import("../view/IndexView.vue"),
+                },
+                {
+                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
+                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "product/category",
                     component: () => import("../view/product/CategoryView.vue"),
-                }
+                },
+                {
+                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
+                    // 唯一的区别是，子路由的 path 不能带斜杠
+                    path: "admin/sysUsers",
+                    component: () => import("../view/admin/SysUsersView.vue"),
+                },
+                {
+                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
+                    // 唯一的区别是，子路由的 path 不能带斜杠
+                    path: "admin/sysUser/:id",
+                    component: () => import("../view/admin/SysUserDetailView.vue"),
+                },
+                {
+                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
+                    // 唯一的区别是，子路由的 path 不能带斜杠
+                    path: "admin/sysUserInfo",
+                    component: () => import("../view/admin/SysUserInfoView.vue"),
+                },
+
             ]
         },
         // 这里添加之后的路由，格式如上，如{}，{}，在大括号里写具体的路径对应

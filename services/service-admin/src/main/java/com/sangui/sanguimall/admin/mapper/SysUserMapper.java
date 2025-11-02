@@ -2,6 +2,8 @@ package com.sangui.sanguimall.admin.mapper;
 
 import com.sangui.sanguimall.admin.model.entity.SysUser;
 
+import java.util.List;
+
 /**
  * @author sangui
  */
@@ -19,4 +21,8 @@ public interface SysUserMapper {
     int updateByPrimaryKey(SysUser record);
 
     SysUser selectByUsername(String username);
+
+    List<SysUser> selectSysUsersByPage();
+
+    SysUser selectByIdWithCreateUserName(Long id);
 }

@@ -1,12 +1,13 @@
 package com.sangui.sanguimall.admin.web;
 
 
+import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
+import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.result.R;
+import jakarta.annotation.Resource;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author: sangui
@@ -17,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/sysUser")
 public class SysUserController {
+    @Resource
+    SysUserService sysUserService;
+
     /**
      * 判断是否可以免密登录
      * @return 判断结果
@@ -34,8 +38,34 @@ public class SysUserController {
      */
     @GetMapping("/info")
     public R getLoginInfo(Authentication authentication){
-        System.out.println("login info 's authentication:" + authentication);
+        //System.out.println("login info 's authentication:" + authentication);
         SysUser sysUser = (SysUser) authentication.getPrincipal();
+        return R.ok(sysUser);
+    }
+
+    /**
+     * 获取全部用户的信息
+     * @param current 当前页数
+     * @return 当前页数的用户信息
+     */
+    @GetMapping("/sysUsers")
+    public R getUsers(@RequestParam(value = "current",required = false)Integer current){
+        if (current == null){
+            current = 1;
+        }
+        PageInfo<SysUser> pageInfo = sysUserService.getSysUsersByPage(current);
+
+        return R.ok(pageInfo);
+    }
+
+    /**
+     * 响应给前端指定 id 的用户信息
+     * @param id 用户 id
+     * @return 用户信息
+     */
+    @GetMapping("/{id}")
+    public R getUserDetail(@PathVariable("id")Long id){
+        SysUser sysUser = sysUserService.getUserDetailById(id);
         return R.ok(sysUser);
     }
 }

@@ -12,6 +12,23 @@
         <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
+
+    <resultMap id="UserDetailMap" type="com.sangui.sanguimall.admin.model.entity.SysUser">
+        <id column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="salt" jdbcType="VARCHAR" property="salt"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <!--一对一关联-->
+        <association property="createByDo" javaType="com.sangui.sanguimall.admin.model.entity.SysUser">
+            <id column="createById" jdbcType="BIGINT" property="userId"/>
+            <result column="createByName" jdbcType="VARCHAR" property="username"/>
+        </association>
+    </resultMap>
     <sql id="Base_Column_List">
         user_id
         , username, `password`, salt, email, mobile, `status`, create_user_id, create_time
@@ -23,6 +40,22 @@
         from sys_user
         where username = #{username,jdbcType=VARCHAR}
     </select>
+
+
+    <select id="selectByIdWithCreateUserName" parameterType="java.lang.Long" resultMap="UserDetailMap">
+        select su1.*, su2.user_id createById, su2.username createByName
+        from sys_user su1
+        left join sys_user su2
+        on su1.create_user_id = su2.user_id
+        where su1.user_id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectSysUsersByPage" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+    </select>
+
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

@@ -104,4 +104,7 @@ public class SysUser implements Serializable, UserDetails {
     public boolean isEnabled() {
         return this.getStatus() == 1;
     }
+
+    // 两个一对一关联的属性
+    private SysUser createByDo;
 }
