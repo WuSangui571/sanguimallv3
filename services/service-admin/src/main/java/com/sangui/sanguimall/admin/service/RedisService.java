@@ -1,11 +1,11 @@
-package com.sangui.sanguimall.service;
+package com.sangui.sanguimall.admin.service;
 
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: sangui
- * @CreateTime: 2025-10-29
+ * @CreateTime: 2025-11-02
  * @Description: RedisService
  * @Version: 1.0
  */

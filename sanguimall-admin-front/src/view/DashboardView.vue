@@ -80,14 +80,15 @@
       <el-header>
         <el-dropdown :hide-on-click="false">
           <span class="el-dropdown-link">
-            此处动态获取用户姓名
+<!--            此处动态获取用户姓名-->
+            {{user.username}}
             <el-icon class="el-icon--right"><arrow-down/></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>我的资料</el-dropdown-item>
               <el-dropdown-item>修改密码</el-dropdown-item>
-              <el-dropdown-item divided>退出登录</el-dropdown-item>
+              <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -110,12 +111,17 @@
 
 <script>
 import {defineComponent} from 'vue'
+import {doGet} from "../http/HttpRequest.js";
+import {messageConfirm, messageTip, removeToken} from "../util/util.js";
 
 export default defineComponent({
   name: "DashboardView",
   data() {
     return {
       isCollapse: false,
+      user: {
+        username: "",
+      },
       // 当前访问路径，默认为空
       currentRouterPath: "",
       // 控制该区域页面内容是否显示
@@ -135,8 +141,38 @@ export default defineComponent({
   mounted() {
     // 执行这个方法，获取当前路径地址
     this.loadCurrentRouterPath();
+    this.loadLoginUser();
   },
   methods: {
+    // 退出登录的方法
+    logout(){
+      doGet("/api/admin/sysUser/logout",{}).then((resp) =>{
+        // 看看响应的形式是怎么样的
+        console.log(resp);
+        if (resp.data.code === 200){
+          messageTip("退出成功！","success");
+          removeToken();
+          window.location.href = "/";
+        }else{
+          messageConfirm("退出异常，是否强制退出？","温馨提示").then(() =>{
+            removeToken();
+            window.location.href = "/";
+          }).catch(() => {
+            // 用户点击取消就会触发 catch 里
+            messageTip("取消强制退出","warning")
+          })
+        }
+      })
+    },
+    loadLoginUser(){
+      // 发送给后端请求，请求当前登录用户
+      doGet("/api/admin/sysUser/info",{}).then((resp) =>{
+        // 看看响应的形式是怎么样的
+        // console.log(resp);
+        // console.log(resp.data.data.name);
+        this.user = resp.data.data;
+      })
+    },
     // 折叠左侧菜单的方法
     foldLeftSide() {
       this.isCollapse = !this.isCollapse;

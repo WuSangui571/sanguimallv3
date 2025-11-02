@@ -115,7 +115,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public int editCategorySequence(CategorySequenceQuery categorySequenceQuery) {
-        System.out.println(categorySequenceQuery);
+        //System.out.println(categorySequenceQuery);
         CategoryDo categoryNeedSequenceDo = categoryMapper.selectByPrimaryKey(categorySequenceQuery.getDraggingNodeId());
         CategoryDo sequenceNeedAfterMeDo = categoryMapper.selectByPrimaryKey(categorySequenceQuery.getAfterDropNodeId());
         List<CategoryDo> sameParentCategoryDoList = categoryMapper.selectBySameParent(categoryNeedSequenceDo.getParentCid());

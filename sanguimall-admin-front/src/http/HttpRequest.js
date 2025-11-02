@@ -74,7 +74,10 @@ axios.interceptors.response.use((response) => {
         })
             // 若点击"取消"按钮，走这个
             .catch(() => {
-                messageTip("已取消去登录！", "warning")
+                // 既然后端验证 token 未通过，token 是非法的，删除 token 先
+                removeToken();
+                // 跳到登录页
+                window.location.href = ("/");
             })
         return;
     }

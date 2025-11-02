@@ -7,10 +7,13 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.sangui.sanguimall.constant.Constants;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+
 
 /**
  * @Author: sangui
@@ -19,10 +22,7 @@ import java.util.Map;
  * @Version: 1.0
  */
 public class JwtUtils {
-    /**
-     * 自定义的密钥，新项目中，修改自定义密钥
-     */
-    public static final String SECRET = "ysysljjmtdsxxx";
+
 
 
     /**
@@ -42,7 +42,7 @@ public class JwtUtils {
                 //负载
                 .withClaim("user", userJson)
                 //签名
-                .sign(Algorithm.HMAC256(SECRET));
+                .sign(Algorithm.HMAC256(Constants.SECRET));
     }
 
     /**
@@ -53,7 +53,7 @@ public class JwtUtils {
     public static Boolean verifyJwt(String jwt) {
         try {
             // 使用秘钥创建一个 jwt 验证器对象
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(Constants.SECRET)).build();
 
             //验证 jwt ，如果没有抛出异常，说明验证通过，否则验证不通过
             jwtVerifier.verify(jwt);
@@ -72,7 +72,7 @@ public class JwtUtils {
     public static void parseJwt(String jwt) {
         try {
             // 使用秘钥创建一个验证器对象
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(Constants.SECRET)).build();
 
             //验证JWT，得到一个解码后的jwt对象
             DecodedJWT decodedJwt = jwtVerifier.verify(jwt);
@@ -95,24 +95,4 @@ public class JwtUtils {
             throw new RuntimeException(e);
         }
     }
-
-//    public static TUser parseUserFromJwt(String jwt) {
-//        try {
-//            // 使用秘钥创建一个验证器对象
-//            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
-//
-//            // 验证 jwt，得到一个解码后的 jwt 对象
-//            DecodedJWT decodedJwt = jwtVerifier.verify(jwt);
-//
-//            // 通过解码后的 jwt 对象，就可以获取里面的负载数据
-//            Claim userClaim = decodedJwt.getClaim("user");
-//
-//            String userJson = userClaim.asString();
-//
-//            return JsonUtils.toBean(userJson, TUser.class);
-//        } catch (TokenExpiredException e) {
-//            e.printStackTrace();
-//            throw new RuntimeException(e);
-//        }
-//    }
 }
