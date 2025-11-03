@@ -60,7 +60,6 @@ let router = createRouter({
                     path: "admin/sysUserInfo",
                     component: () => import("../view/admin/SysUserInfoView.vue"),
                 },
-
             ]
         },
         // 这里添加之后的路由，格式如上，如{}，{}，在大括号里写具体的路径对应

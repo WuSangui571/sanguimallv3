@@ -1,87 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sangui.sanguimall.admin.mapper.SysRoleMapper">
-  <resultMap id="BaseResultMap" type="com.sangui.sanguimall.admin.model.entity.SysRole">
-    <id column="role_id" jdbcType="BIGINT" property="roleId" />
-    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
-    <result column="remark" jdbcType="VARCHAR" property="remark" />
-    <result column="create_user_id" jdbcType="BIGINT" property="createUserId" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    role_id, role_name, remark, create_user_id, create_time
-  </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
-    from sys_role
-    where role_id = #{roleId,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from sys_role
-    where role_id = #{roleId,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" keyColumn="role_id" keyProperty="roleId" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole" useGeneratedKeys="true">
-    insert into sys_role (role_name, remark, create_user_id, 
-      create_time)
-    values (#{roleName,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createUserId,jdbcType=BIGINT}, 
-      #{createTime,jdbcType=TIMESTAMP})
-  </insert>
-  <insert id="insertSelective" keyColumn="role_id" keyProperty="roleId" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole" useGeneratedKeys="true">
-    insert into sys_role
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="roleName != null">
-        role_name,
-      </if>
-      <if test="remark != null">
-        remark,
-      </if>
-      <if test="createUserId != null">
-        create_user_id,
-      </if>
-      <if test="createTime != null">
-        create_time,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="roleName != null">
-        #{roleName,jdbcType=VARCHAR},
-      </if>
-      <if test="remark != null">
-        #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="createUserId != null">
-        #{createUserId,jdbcType=BIGINT},
-      </if>
-      <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole">
-    update sys_role
-    <set>
-      <if test="roleName != null">
-        role_name = #{roleName,jdbcType=VARCHAR},
-      </if>
-      <if test="remark != null">
-        remark = #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="createUserId != null">
-        create_user_id = #{createUserId,jdbcType=BIGINT},
-      </if>
-      <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-    </set>
-    where role_id = #{roleId,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole">
-    update sys_role
-    set role_name = #{roleName,jdbcType=VARCHAR},
-      remark = #{remark,jdbcType=VARCHAR},
-      create_user_id = #{createUserId,jdbcType=BIGINT},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
-    where role_id = #{roleId,jdbcType=BIGINT}
-  </update>
+    <resultMap id="BaseResultMap" type="com.sangui.sanguimall.admin.model.entity.SysRole">
+        <id column="role_id" jdbcType="BIGINT" property="roleId"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        role_id
+        , role_name, remark, create_user_id, create_time
+    </sql>
+
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select sr.*
+        from sys_role sr
+                 left join sys_user_role sur
+                           on sr.role_id = sur.role_id
+                 left join sys_user su
+                           on sur.user_id = su.user_id
+        where su.user_id = #{userId,jdbcType=BIGINT}
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_role
+        where role_id = #{roleId,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from sys_role
+        where role_id = #{roleId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" keyColumn="role_id" keyProperty="roleId"
+            parameterType="com.sangui.sanguimall.admin.model.entity.SysRole" useGeneratedKeys="true">
+        insert into sys_role (role_name, remark, create_user_id,
+                              create_time)
+        values (#{roleName,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createUserId,jdbcType=BIGINT},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" keyColumn="role_id" keyProperty="roleId"
+            parameterType="com.sangui.sanguimall.admin.model.entity.SysRole" useGeneratedKeys="true">
+        insert into sys_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roleName != null">
+                role_name,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="createUserId != null">
+                create_user_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="roleName != null">
+                #{roleName,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createUserId != null">
+                #{createUserId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole">
+        update sys_role
+        <set>
+            <if test="roleName != null">
+                role_name = #{roleName,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createUserId != null">
+                create_user_id = #{createUserId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where role_id = #{roleId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.sangui.sanguimall.admin.model.entity.SysRole">
+        update sys_role
+        set role_name      = #{roleName,jdbcType=VARCHAR},
+            remark         = #{remark,jdbcType=VARCHAR},
+            create_user_id = #{createUserId,jdbcType=BIGINT},
+            create_time    = #{createTime,jdbcType=TIMESTAMP}
+        where role_id = #{roleId,jdbcType=BIGINT}
+    </update>
 </mapper>

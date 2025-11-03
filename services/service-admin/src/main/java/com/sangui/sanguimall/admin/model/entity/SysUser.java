@@ -68,6 +68,10 @@ public class SysUser implements Serializable, UserDetails {
 
     // 角色 List
     private List<String> roleList;
+    // 权限之中的按钮权限的权限 Code 的 List
+    private List<String> buttonPermissionList;
+    // 权限之中的菜单权限的 List
+    private List<SysMenu> menuPermissionList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -76,6 +80,13 @@ public class SysUser implements Serializable, UserDetails {
         if (!ObjectUtils.isEmpty(this.getRoleList())){
             this.getRoleList().forEach(role -> {
                 list.add(new SimpleGrantedAuthority(role));
+            });
+        }
+
+        // 权限标识符
+        if (!ObjectUtils.isEmpty(this.getButtonPermissionList())){
+            this.getButtonPermissionList().forEach(permission -> {
+                list.add(new SimpleGrantedAuthority(permission));
             });
         }
         return list;
