@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -68,9 +69,8 @@ public class SysUser implements Serializable, UserDetails {
 
     // 角色 List
     private List<String> roleList;
-    // 权限之中的按钮权限的权限 Code 的 List
-    private List<String> buttonPermissionList;
-    // 权限之中的菜单权限的 List
+
+    // 权限 List
     private List<SysMenu> menuPermissionList;
 
     @Override
@@ -79,15 +79,51 @@ public class SysUser implements Serializable, UserDetails {
         // 角色
         if (!ObjectUtils.isEmpty(this.getRoleList())){
             this.getRoleList().forEach(role -> {
-                list.add(new SimpleGrantedAuthority(role));
+                list.add(new SimpleGrantedAuthority("ROLE_" + role));
             });
         }
 
         // 权限标识符
-        if (!ObjectUtils.isEmpty(this.getButtonPermissionList())){
-            this.getButtonPermissionList().forEach(permission -> {
-                list.add(new SimpleGrantedAuthority(permission));
+        if (!ObjectUtils.isEmpty(this.getMenuPermissionList())){
+            this.getMenuPermissionList().forEach(sysMenu -> {
+                if (sysMenu.getPerms() != null && !sysMenu.getPerms().isEmpty()){
+                    // 关键：按逗号拆分
+                    String[] permArray = sysMenu.getPerms().split(",");
+                    for (String perm : permArray) {
+                        String trimmed = perm.trim();
+                            list.add(new SimpleGrantedAuthority(trimmed));
+                    }
+                }
+                if (!ObjectUtils.isEmpty(sysMenu.getChildMenu())){
+                    sysMenu.getChildMenu().forEach(childSysMenu->{
+                        if (childSysMenu.getPerms() != null && !childSysMenu.getPerms().isEmpty()){
+                            // 关键：按逗号拆分
+                            String[] permArray = childSysMenu.getPerms().split(",");
+                            for (String perm : permArray) {
+                                String trimmed = perm.trim();
+                                list.add(new SimpleGrantedAuthority(trimmed));
+                            }
+                        }
+                        if (!ObjectUtils.isEmpty(childSysMenu.getChildMenu())){
+                            childSysMenu.getChildMenu().forEach(childChildSysMenu->{
+                                if (childChildSysMenu.getPerms() != null && !childChildSysMenu.getPerms().isEmpty()){
+                                    // 关键：按逗号拆分
+                                    String[] permArray = childChildSysMenu.getPerms().split(",");
+                                    for (String perm : permArray) {
+                                        String trimmed = perm.trim();
+                                        list.add(new SimpleGrantedAuthority(trimmed));
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
             });
+//            System.out.println("权限列表：" );
+//            for (GrantedAuthority item:list){
+//                System.out.println("[" + item.toString()+"]");
+//            }
+//            System.out.println("权限列表结束" );
         }
         return list;
     }

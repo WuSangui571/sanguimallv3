@@ -6,6 +6,7 @@ import com.sangui.sanguimall.admin.model.entity.SysUser;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ public class SysUserController {
      * @param authentication 注入的 SpringSecurity 的信息
      * @return 包含当前登录人 tUser 对象信息的响应
      */
+    //@PreAuthorize("hasAuthority('sys:user:info')")
     @GetMapping("/info")
     public R getLoginInfo(Authentication authentication){
         //System.out.println("login info 's authentication:" + authentication);
@@ -48,6 +50,7 @@ public class SysUserController {
      * @param current 当前页数
      * @return 当前页数的用户信息
      */
+    @PreAuthorize("hasAuthority('sys:user:list')")
     @GetMapping("/sysUsers")
     public R getUsers(@RequestParam(value = "current",required = false)Integer current){
         if (current == null){

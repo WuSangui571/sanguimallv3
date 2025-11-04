@@ -31,6 +31,9 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
     @Resource
     private RedisService redisService;
 
+    @Resource
+    private SysUserUtil sysUserUtil;
+
     /**
      * 退出成功，执行该方法，在该方法中返回 json 给前端，就行了
      * @param request request
@@ -45,7 +48,7 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
         System.out.println(request.getHeader("Authorization"));
         SysUser sysUser;
         if (authentication == null) {
-            sysUser = SysUserUtil.parseUserFromJwt(request.getHeader("Authorization"));
+            sysUser = sysUserUtil.parseUserFromJwt(request.getHeader("Authorization"));
         }else {
             // 取出 authentication 里的 tUser
             sysUser = (SysUser)authentication.getPrincipal();

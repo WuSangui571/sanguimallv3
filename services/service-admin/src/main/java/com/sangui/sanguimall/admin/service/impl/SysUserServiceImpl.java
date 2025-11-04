@@ -56,17 +56,8 @@ public class SysUserServiceImpl implements SysUserService {
 
         // 查询一下该用户有哪些菜单权限
         List<SysMenu> menuPermissionList = sysMenuMapper.selectMenuPermissionByUserId(sysUser.getUserId());
+        System.out.println("menuPermissionList=" + menuPermissionList);
         sysUser.setMenuPermissionList(menuPermissionList);
-
-        // 查询一下该用户有哪些功能权限
-        List<SysMenu> buttonPermissionList = sysMenuMapper.selectButtonPermissionByUserId(sysUser.getUserId());
-        List<String> stringPermissionList = new ArrayList<>();
-        buttonPermissionList.forEach(buttonPermission -> {
-            // 权限标识符
-            stringPermissionList.add(buttonPermission.getPerms());
-        });
-        // 设置用户的权限标识符
-        sysUser.setButtonPermissionList(stringPermissionList);
 
         return sysUser;
     }

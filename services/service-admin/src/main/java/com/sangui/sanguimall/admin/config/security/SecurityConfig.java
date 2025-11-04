@@ -9,6 +9,7 @@ import com.sangui.sanguimall.constant.Constants;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,6 +29,7 @@ import java.util.List;
  * @Description: SpringSecurity 配置文件
  * @Version: 1.0
  */
+@EnableMethodSecurity
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

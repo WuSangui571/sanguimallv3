@@ -35,7 +35,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         SysUser sysUser = (SysUser) authentication.getPrincipal();
 
         // 把 tUser 对象转成 json 作为负载数据放入 jwt
-        String userJson = JsonUtils.toJson(sysUser);
+        String userJson = JsonUtils.toJson(sysUser.getUserId());
         String jwt = JwtUtils.createJwt(userJson);
         System.out.println("jwt:" + jwt);
 

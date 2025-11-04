@@ -17,7 +17,5 @@ public interface SysMenuMapper {
 
     int updateByPrimaryKey(SysMenu record);
 
-    List<SysMenu> selectButtonPermissionByUserId(Long userId);
-
     List<SysMenu> selectMenuPermissionByUserId(Long userId);
 }

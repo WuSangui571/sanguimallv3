@@ -41,6 +41,9 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
     @Resource
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
+    @Resource
+    private SysUserUtil sysUserUtil;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 如果是登录请求，此时还没有生成 jwt，那不需要对登录请求进行 jwt 验证
@@ -50,7 +53,7 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
             // 验证 jwt 通过了 ，让 Filter 链继续执行，也就是继续执行下一个 Filter
             filterChain.doFilter(request, response);
         } else {
-            String token = null;
+            String token;
             if (request.getRequestURI().equals(Constants.EXPORT_EXCEL_URI)) {
                 // 从请求路径的参数中获取 token
                 token = request.getParameter("Authorization");
@@ -80,7 +83,8 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
                 return;
             }
 
-            SysUser sysUser = SysUserUtil.parseUserFromJwt(token);
+
+            SysUser sysUser = sysUserUtil.parseUserFromJwt(token);
             String redisToken = (String) redisService.getValue(Constants.REDIS_JWT_KEY + sysUser.getUserId());
 
             if (!StringUtils.hasText(redisToken)) {

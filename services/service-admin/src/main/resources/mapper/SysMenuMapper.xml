@@ -11,28 +11,68 @@
         <result column="icon" jdbcType="VARCHAR" property="icon"/>
         <result column="order_num" jdbcType="INTEGER" property="orderNum"/>
     </resultMap>
+
+    <resultMap id="MyMenuMap" type="com.sangui.sanguimall.admin.model.entity.SysMenu">
+        <id column="menu_id" jdbcType="BIGINT" property="menuId"/>
+        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="perms" jdbcType="VARCHAR" property="perms"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="order_num" jdbcType="INTEGER" property="orderNum"/>
+        <!-- 一级嵌套：子菜单集合 -->
+        <collection property="childMenu" ofType="com.sangui.sanguimall.admin.model.entity.SysMenu">
+            <id column="cmenu_id" jdbcType="BIGINT" property="menuId" />
+            <result column="cname" jdbcType="VARCHAR" property="name" />
+            <result column="cparent_id" jdbcType="BIGINT" property="parentId" />
+            <result column="curl" jdbcType="VARCHAR" property="url" />
+            <result column="cperm" jdbcType="VARCHAR" property="perms" />
+            <result column="ctype" jdbcType="INTEGER" property="type" />
+            <result column="cicon" jdbcType="VARCHAR" property="icon" />
+            <result column="corder_num" jdbcType="INTEGER" property="orderNum" />
+
+            <!-- 二级嵌套：孙菜单集合 -->
+            <collection property="childMenu" ofType="com.sangui.sanguimall.admin.model.entity.SysMenu">
+                <id column="ccmenu_id" jdbcType="BIGINT" property="menuId" />
+                <result column="ccname" jdbcType="VARCHAR" property="name" />
+                <result column="ccparent_id" jdbcType="BIGINT" property="parentId" />
+                <result column="ccurl" jdbcType="VARCHAR" property="url" />
+                <result column="ccperm" jdbcType="VARCHAR" property="perms" />
+                <result column="cctype" jdbcType="INTEGER" property="type" />
+                <result column="ccicon" jdbcType="VARCHAR" property="icon" />
+                <result column="ccorder_num" jdbcType="INTEGER" property="orderNum" />
+            </collection>
+        </collection>
+    </resultMap>
     <sql id="Base_Column_List">
         menu_id
         , parent_id, `name`, url, perms, `type`, icon, order_num
     </sql>
-    <select id="selectButtonPermissionByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select sm.*
-        from sys_menu sm
-                 left join sys_role_menu srm
-                           on sm.menu_id = srm.menu_id
-                 left join sys_role sr
-                           on srm.role_id = sr.role_id
-                 left join sys_user_role sur
-                           on sr.role_id = sur.role_id
-                 left join sys_user su
-                           on sur.user_id = su.user_id
-        where su.user_id = #{userId,jdbcType=BIGINT}
-          and sm.type = 2
-    </select>
 
-    <select id="selectMenuPermissionByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select sm.*
+    <select id="selectMenuPermissionByUserId" parameterType="java.lang.Long" resultMap="MyMenuMap">
+        select sm.*,
+               sm_child.menu_id         cmenu_id,
+               sm_child.parent_id       cparent_id,
+               sm_child.name            cname,
+               sm_child.url             curl,
+               sm_child.perms           cperm,
+               sm_child.type            ctype,
+               sm_child.icon            cicon,
+               sm_child.order_num       corder_num,
+               sm_child_child.menu_id   ccmenu_id,
+               sm_child_child.parent_id ccparent_id,
+               sm_child_child.name      ccname,
+               sm_child_child.url       ccurl,
+               sm_child_child.perms     ccperm,
+               sm_child_child.type      cctype,
+               sm_child_child.icon      ccicon,
+               sm_child_child.order_num corder_num
         from sys_menu sm
+                 left join sys_menu sm_child
+                           on sm.menu_id = sm_child.parent_id
+                 left join sys_menu sm_child_child
+                           on sm_child.menu_id = sm_child_child.parent_id
                  left join sys_role_menu srm
                            on sm.menu_id = srm.menu_id
                  left join sys_role sr
@@ -42,7 +82,7 @@
                  left join sys_user su
                            on sur.user_id = su.user_id
         where su.user_id = #{userId,jdbcType=BIGINT}
-          and sm.type != 2
+          and sm.parent_id = 0
     </select>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">

@@ -1,11 +1,15 @@
 package com.sangui.sanguimall.admin.model.entity;
 
+
 import java.io.Serializable;
+import java.util.List;
+
 import lombok.Data;
 
 /**
  * 菜单管理
  * sys_menu
+ * @author sangui
  */
 @Data
 public class SysMenu implements Serializable {
@@ -47,4 +51,7 @@ public class SysMenu implements Serializable {
     private Integer orderNum;
 
     private static final long serialVersionUID = 1L;
+
+
+    private List<SysMenu> childMenu;
 }
