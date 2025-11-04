@@ -5,7 +5,6 @@ import com.sangui.sanguimall.product.model.entity.CategoryDo;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 
 /**
@@ -16,8 +15,6 @@ import org.mapstruct.factory.Mappers;
  */
 @Mapper(componentModel = "spring")
 public interface CategoryConverter {
-    //CategoryConverter INSTANCE = Mappers.getMapper(CategoryConverter.class);
-
     /**
      * DO → VO
      */
@@ -26,5 +23,4 @@ public interface CategoryConverter {
     @Mapping(source = "name", target = "label")
     @Mapping(source = "catLevel", target = "level")
     CategoryVo doToVo(CategoryDo categoryDo);
-
 }

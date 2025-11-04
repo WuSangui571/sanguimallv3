@@ -1,0 +1,18 @@
+package com.sangui.sanguimall.admin.manager;
+
+
+import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+
+/**
+ * @Author: sangui
+ * @CreateTime: 2025-11-04
+ * @Description:
+ * @Version: 1.0
+ */
+public interface SysUserManager {
+    int addUser(SysRoleQuery sysRoleQuery, Authentication authentication);
+
+    UserDetails loadUserByUsername(String username);
+}

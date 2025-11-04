@@ -3,6 +3,7 @@ package com.sangui.sanguimall.admin.web;
 
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
+import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
@@ -70,5 +71,16 @@ public class SysUserController {
     public R getUserDetail(@PathVariable("id")Long id){
         SysUser sysUser = sysUserService.getUserDetailById(id);
         return R.ok(sysUser);
+    }
+
+    /**
+     * 新增用户
+     * @param sysRoleQuery 前端传过来的用户信息
+     * @return 响应前端 o 不 ok
+     */
+    @PostMapping("/role")
+    public R addUser(SysRoleQuery sysRoleQuery,Authentication authentication) {
+        int count = sysUserService.addUser(sysRoleQuery,authentication);
+        return count >= 2 ? R.ok() : R.fail();
     }
 }
