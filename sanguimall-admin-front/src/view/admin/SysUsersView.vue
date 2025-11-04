@@ -17,7 +17,7 @@
     <el-table-column label="操作">
       <template #default="scope">
         <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
-        <el-button type="warning">编辑</el-button>
+        <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
         <el-button type="danger">删除</el-button>
       </template>
     </el-table-column>
@@ -148,6 +148,60 @@ export default defineComponent({
     }
   },
   methods: {
+    // 编辑指定 id 的用户
+    edit(id) {
+      this.addUserWindows = true;
+      this.loadEditData(id);
+    },
+    // 编辑时加载对应 id 用户的数据
+    loadEditData(id) {
+      let url = "/api/admin/sysUser/" + id
+      doGet(url, {}).then((resp) => {
+        console.log(resp.data.data);
+        if (resp.data.code === 200) {
+          // 简单一点，也可以这样：
+          // this.addUser = resp.data.data;
+          this.addUser.id = resp.data.data.id;
+          this.addUser.username = resp.data.data.username;
+          this.addUser.password = "";
+          this.addUser.email = resp.data.data.email;
+          this.addUser.mobile = resp.data.data.mobile;
+          this.addUser.roleDo = resp.data.data.roleDo;
+          this.addUser.accountNoExpired = resp.data.data.accountNoExpired == 1 ? "正常" : "已过期";
+          this.addUser.credentialsNoExpired = resp.data.data.credentialsNoExpired == 1 ? "正常" : "已过期";
+          this.addUser.accountNoLocked = resp.data.data.accountNoLocked == 1 ? "正常" : "已锁定";
+          this.addUser.accountEnabled = resp.data.data.accountEnabled == 1 ? "正常" : "未启用";
+          // 注意，如果返回的值有可能为空（null），则使用下列形式赋值
+          // this.addUser = {
+          //   ...this.addUser,
+          //   id: resp.data.data.id || '',
+          //   ownerDo: resp.data.data.ownerDo || { id: '', name: '' },
+          //   activityDo: resp.data.data.activityDo || { id: '', name: '' },
+          //   fullName: resp.data.data.fullName || '',
+          //   appellationDO: resp.data.data.appellationDO || { id: '', typeValue: '' },
+          //   phone: resp.data.data.phone || '',
+          //   weixin: resp.data.data.weixin || '',
+          //   qq: resp.data.data.qq || '',
+          //   email: resp.data.data.email || '',
+          //   age: resp.data.data.age || '',
+          //   job: resp.data.data.job || '',
+          //   yearIncome: resp.data.data.yearIncome || '',
+          //   address: resp.data.data.address || '',
+          //   needLoanDO: resp.data.data.needLoanDO || { id: '', typeValue: '' },
+          //   intentionStateDO: resp.data.data.intentionStateDO || { id: '', typeValue: '' },
+          //   intentionProductDO: resp.data.data.intentionProductDO || { id: '', name: '' },
+          //   stateDO: resp.data.data.stateDO || { id: '', typeValue: '' },
+          //   sourceDO: resp.data.data.sourceDO || { id: '', typeValue: '' },
+          //   description: resp.data.data.description || '',
+          //   nextContactTime: resp.data.data.nextContactTime || '',
+          //   createDo: resp.data.data.createDo || { id: '', name: '' },
+          //   createTime: resp.data.data.createTime || '',
+          //   editDo: resp.data.data.editDo || { id: '', name: '' },
+          //   editTime: resp.data.data.editTime || '',
+          // };
+        }
+      })
+    },
     loadRoleOptions() {
       doGet("/api/admin/sysRole/roles", {}).then(resp => {
         console.log(resp.data.data)

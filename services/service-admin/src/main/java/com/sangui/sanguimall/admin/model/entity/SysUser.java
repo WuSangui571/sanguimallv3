@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import com.alibaba.cloud.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -154,4 +153,5 @@ public class SysUser implements Serializable, UserDetails {
 
     // 两个一对一关联的属性
     private SysUser createByDo;
+    private SysRole sysRole;
 }

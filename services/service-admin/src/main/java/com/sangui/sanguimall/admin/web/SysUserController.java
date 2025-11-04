@@ -4,6 +4,7 @@ package com.sangui.sanguimall.admin.web;
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
 import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.vo.SysUserVo;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
@@ -69,8 +70,9 @@ public class SysUserController {
      */
     @GetMapping("/{id}")
     public R getUserDetail(@PathVariable("id")Long id){
-        SysUser sysUser = sysUserService.getUserDetailById(id);
-        return R.ok(sysUser);
+        SysUserVo sysUserVo = sysUserService.getUserDetailById(id);
+        System.out.println("sysUserVo= "+ sysUserVo);
+        return R.ok(sysUserVo);
     }
 
     /**

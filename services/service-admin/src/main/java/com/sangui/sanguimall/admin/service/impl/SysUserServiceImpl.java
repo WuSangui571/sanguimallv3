@@ -7,8 +7,10 @@ import com.sangui.sanguimall.admin.manager.SysUserManager;
 import com.sangui.sanguimall.admin.mapper.SysMenuMapper;
 import com.sangui.sanguimall.admin.mapper.SysRoleMapper;
 import com.sangui.sanguimall.admin.mapper.SysUserMapper;
+import com.sangui.sanguimall.admin.model.converter.SysUserConverter;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
 import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.vo.SysUserVo;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.constant.Constants;
 import jakarta.annotation.Resource;
@@ -33,6 +35,9 @@ public class SysUserServiceImpl implements SysUserService {
     @Resource
     SysUserManager sysUserManager;
 
+    @Resource
+    SysUserConverter sysUserConverter;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return sysUserManager.loadUserByUsername(username);
@@ -49,8 +54,11 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public SysUser getUserDetailById(Long id) {
-        return sysUserMapper.selectByIdWithCreateUserName(id);
+    public SysUserVo getUserDetailById(Long id) {
+
+        SysUser sysUser = sysUserMapper.selectByIdWithCreateUserNameAndRole(id);
+        System.out.println("sysUser=" + sysUser);
+        return sysUserConverter.doToVo(sysUser);
     }
 
     @Override

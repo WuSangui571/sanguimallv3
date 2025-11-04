@@ -24,5 +24,8 @@ public interface SysUserMapper {
 
     List<SysUser> selectSysUsersByPage();
 
+    // 即将删除
     SysUser selectByIdWithCreateUserName(Long id);
+
+    SysUser selectByIdWithCreateUserNameAndRole(Long id);
 }

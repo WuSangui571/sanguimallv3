@@ -4,7 +4,7 @@
     <el-form-item label="ID">
       <div class="div-item">
         <!-- 写上 &nbsp; 是为了防止后面的数据未空，div 里空值-->
-        &nbsp;{{ userDetail.userId }}
+        &nbsp;{{ userDetail.id }}
       </div>
     </el-form-item>
 
@@ -33,6 +33,12 @@
       </div>
     </el-form-item>
 
+    <el-form-item label="角色">
+      <div class="div-item">
+        &nbsp;{{ userDetail.roleVo.typeValue }}
+      </div>
+    </el-form-item>
+
 
     <el-form-item label="账户是否启用">
       <div class="div-item">
@@ -48,7 +54,7 @@
 
     <el-form-item label="创建人">
       <div class="div-item">
-        &nbsp;{{ userDetail.createByDo.username }}
+        &nbsp;{{ userDetail.createByVo.username }}
       </div>
     </el-form-item>
   </el-form>
@@ -62,7 +68,7 @@ export default {
   data() {
     return {
       userDetail: {
-        userId: '',
+        id: '',
         username: '',
         password: '',
         mobile: '',
@@ -70,10 +76,14 @@ export default {
         status:'',
         createTime: '',
         createUserId: '',
-        createByDo: {
-          userId: '',
+        createByVo: {
+          id: '',
           username: '',
         },
+        roleVo:{
+          id:'',
+          typeValue: "",
+        }
       },
     }
   },
@@ -86,9 +96,9 @@ export default {
       let id = this.$route.params.id
       let url = "/api/admin/sysUser/" + id
       doGet(url, {}).then(resp => {
+        console.log("this下面")
         console.log(resp.data.data);
         if (resp.data.code === 200) {
-
           this.userDetail = resp.data.data;
         }
       })
