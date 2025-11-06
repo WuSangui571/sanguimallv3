@@ -2,6 +2,11 @@ package com.sangui.sanguimall.admin.mapper;
 
 import com.sangui.sanguimall.admin.model.entity.SysUserRole;
 
+import java.util.List;
+
+/**
+ * @author sangui
+ */
 public interface SysUserRoleMapper {
     int deleteByPrimaryKey(Long id);
 
@@ -16,4 +21,8 @@ public interface SysUserRoleMapper {
     int updateByPrimaryKey(SysUserRole record);
 
     SysUserRole selectByUserId(Long userId);
+
+    List<SysUserRole> selectByUserIds(String ids);
+
+    int deleteByIds(String ids);
 }

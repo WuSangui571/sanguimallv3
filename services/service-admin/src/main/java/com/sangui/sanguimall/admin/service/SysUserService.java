@@ -22,4 +22,8 @@ public interface SysUserService extends UserDetailsService {
     int addUser(SysUserQuery sysUserQuery, Authentication authentication);
 
     int editUser(SysUserQuery userQuery, Authentication authentication);
+
+    int delUserByIds(String ids);
+
+    int delUserById(Long id);
 }

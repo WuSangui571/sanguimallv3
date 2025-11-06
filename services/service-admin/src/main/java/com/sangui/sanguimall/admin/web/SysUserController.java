@@ -98,4 +98,27 @@ public class SysUserController {
         int count = sysUserService.editUser(sysUserQuery,authentication);
         return count >= 1 ? R.ok() : R.fail();
     }
+    /**
+     * 删除用户
+     * @param id 前端传过来的指定 id 的用户
+     * @return 响应前端 o 不 ok
+     */
+    @DeleteMapping("/sysUser/{id}")
+    public R delUser(@PathVariable("id") Long id) {
+        int count = sysUserService.delUserById(id);
+        return count >= 2 ? R.ok() : R.fail();
+    }
+
+    /**
+     * 批量删除用户
+     * @param ids id 字符串，类似 "2,4,5"
+     * @return 响应前端 o 不 ok
+     */
+    @DeleteMapping("/sysUsers")
+    public R batchDelUser(@RequestParam(value = "ids", required = false) String ids) {
+        int count = sysUserService.delUserByIds(ids);
+        // System.out.println(ids);
+        int len = ids.split(",").length;
+        return count >= 2 * len ? R.ok() : R.fail();
+    }
 }

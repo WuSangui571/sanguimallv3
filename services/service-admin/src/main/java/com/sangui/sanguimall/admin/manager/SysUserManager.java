@@ -17,4 +17,8 @@ public interface SysUserManager {
     UserDetails loadUserByUsername(String username);
 
     int editUser(SysUserQuery sysUserQuery, Authentication authentication);
+
+    int delUserByIds(String ids);
+
+    int delUserById(Long id);
 }

@@ -98,6 +98,36 @@ public class SysUserManagerImpl implements SysUserManager {
     }
 
     @Override
+    public int delUserByIds(String ids) {
+        // 先删除 user-role 表里对应的内容
+        List<SysUserRole> userRoleList= sysUserRoleMapper.selectByUserIds(ids);
+
+        StringBuilder newIds = new StringBuilder();
+        for (SysUserRole sysUserRole:userRoleList){
+            newIds.append(sysUserRole.getId()).append(",");
+        }
+        newIds.deleteCharAt(newIds.length() - 1);
+
+        int count1 = sysUserRoleMapper.deleteByIds(newIds.toString());
+
+        // 再删除 user 表对应的内容
+        int count2 = sysUserMapper.deleteByIds(ids);
+
+        return count1 + count2;
+    }
+
+    @Override
+    public int delUserById(Long id) {
+        // 先删除 user-role 表里对应的内容
+        SysUserRole sysUserRole = sysUserRoleMapper.selectByUserId(id);
+        int count1 = sysUserRoleMapper.deleteByPrimaryKey(sysUserRole.getId());
+
+        // 再删除 user 表对应的内容
+        int count2 = sysUserMapper.deleteByPrimaryKey(id);
+        return count1 + count2;
+    }
+
+    @Override
     public int addUser(SysUserQuery sysUserQuery, Authentication authentication) {
         SysUser sysUser = new SysUser();
         sysUser.setUsername(sysUserQuery.getUsername());

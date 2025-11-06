@@ -74,4 +74,14 @@ public class SysUserServiceImpl implements SysUserService {
         System.out.println("authentication=" + authentication);
         return sysUserManager.editUser(sysUserQuery,authentication);
     }
+
+    @Override
+    public int delUserByIds(String ids) {
+        return sysUserManager.delUserByIds(ids);
+    }
+
+    @Override
+    public int delUserById(Long id) {
+        return sysUserManager.delUserById(id);
+    }
 }

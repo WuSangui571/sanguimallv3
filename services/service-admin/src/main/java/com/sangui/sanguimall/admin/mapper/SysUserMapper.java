@@ -28,4 +28,6 @@ public interface SysUserMapper {
     SysUser selectByIdWithCreateUserName(Long id);
 
     SysUser selectByIdWithCreateUserNameAndRole(Long id);
+
+    int deleteByIds(String ids);
 }

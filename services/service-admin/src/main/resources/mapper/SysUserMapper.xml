@@ -88,6 +88,12 @@
         from sys_user
         where user_id = #{userId,jdbcType=BIGINT}
     </delete>
+    <delete id="deleteByIds" parameterType="java.lang.Long">
+        delete
+        from sys_user
+        where user_id in (${ids,jdbcType=BIGINT})
+    </delete>
+
     <insert id="insert" keyColumn="user_id" keyProperty="userId"
             parameterType="com.sangui.sanguimall.admin.model.entity.SysUser" useGeneratedKeys="true">
         insert into sys_user (username, `password`, salt,

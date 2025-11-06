@@ -1,7 +1,7 @@
 <template>
   <!--两个按钮-->
   <el-button type="primary" @click="add">添加用户</el-button>
-  <el-button type="danger">批量删除</el-button>
+  <el-button type="danger" @click="batchDel">批量删除</el-button>
   <!--表格开始-->
   <el-table
       :data="sysUserList"
@@ -18,7 +18,7 @@
       <template #default="scope">
         <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
         <el-button type="warning" @click="edit(scope.row.userId)">编辑</el-button>
-        <el-button type="danger">删除</el-button>
+        <el-button type="danger" @click="del(scope.row.userId,scope.row.username)">删除</el-button>
       </template>
     </el-table-column>
 
@@ -93,8 +93,8 @@
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPost, doPut} from "../../http/HttpRequest.js";
-import {messageTip} from "../../util/util.js";
+import {doDelete, doGet, doPost, doPut} from "../../http/HttpRequest.js";
+import {messageConfirm, messageTip} from "../../util/util.js";
 
 export default defineComponent({
   name: "SysUsersView",
@@ -151,9 +151,30 @@ export default defineComponent({
           {required: true, message: '请选择账户状态！', trigger: 'blur'},
         ],
       },
+      selectedIds: [],
+      selectedNames: [],
     }
   },
   methods: {
+
+    // 删除指定用户
+    del(id, name) {
+      messageConfirm("确认删除 " + name + " 吗？", "温馨提示").then(() => {
+        let url = "/api/admin/sysUser/sysUser/" + id
+        //alert(url)
+        doDelete(url, {}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已删除" + name, "success")
+            this.reload();
+          } else {
+            messageTip("删除失败！", "error")
+          }
+        })
+      }).catch(() => {
+        // 用户点击取消就会触发 catch 里
+        messageTip("已取消删除！", "error")
+      })
+    },
     // 编辑指定 id 的用户
     edit(id) {
       this.addUserWindows = true;
@@ -259,8 +280,41 @@ export default defineComponent({
       this.getData(current)
     },
     // 勾选或者取消勾选时触发该函数
-    handleSelectionChange() {
-      // 完成批量删除模块功能时再写这个方法
+    handleSelectionChange(selectionDataArray) {
+      // console.log(selectionDataArray)
+      // 清空 Ids、Names 数组
+      this.selectedIds = [];
+      this.selectedNames = [];
+      // 遍历数组
+      selectionDataArray.forEach(data => {
+        // 遍历数组中的元素，将 id、names 加入统一的数组
+        this.selectedIds.push(data.userId);
+        this.selectedNames.push(data.username);
+      })
+      // console.log(selectionDataArray)
+    },
+    // 批量删除用户
+    batchDel() {
+      if (this.selectedNames.length == 0) {
+        messageTip("请勾选批量删除的用户！", "error")
+        return;
+      }
+      messageConfirm("确认批量删除删除 " + this.selectedNames + " 吗？", "温馨提示").then(() => {
+        // 将数组变成字符串，用逗号相隔
+        let ids = this.selectedIds.join(",");
+        // alert(ids)
+        doDelete("/api/admin/sysUser/sysUsers", {ids: ids}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已批量删除" + this.selectedNames, "success")
+            this.reload();
+          } else {
+            messageTip("批量删除失败！原因：" + resp.data.msg, "error")
+          }
+        })
+      }).catch(() => {
+        // 用户点击取消就会触发 catch 里
+        messageTip("已取消批量删除！", "warning")
+      })
     },
     // 查询用户列表数据
     getData(current) {
