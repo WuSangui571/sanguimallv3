@@ -16,9 +16,6 @@ import org.mapstruct.factory.Mappers;
  */
 @Mapper(componentModel = "spring", uses = {SysRoleConverter.class})
 public interface SysUserConverter {
-
-    SysUserConverter INSTANCE = Mappers.getMapper(SysUserConverter.class);
-
     @Mapping(target = "id", source = "userId")
     @Mapping(target = "createByVo", source = "createByDo", qualifiedByName = "toSimpleVo")
     @Mapping(target = "roleVo", source = "sysRole") // 会调用 SysRoleConverter

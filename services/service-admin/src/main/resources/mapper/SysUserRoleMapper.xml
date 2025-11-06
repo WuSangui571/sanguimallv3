@@ -9,6 +9,13 @@
   <sql id="Base_Column_List">
     id, user_id, role_id
   </sql>
+
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sys_user_role
+        where user_id = #{userId,jdbcType=BIGINT}
+    </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />

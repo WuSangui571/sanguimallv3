@@ -17,7 +17,7 @@
     <el-table-column label="操作">
       <template #default="scope">
         <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
-        <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
+        <el-button type="warning" @click="edit(scope.row.userId)">编辑</el-button>
         <el-button type="danger">删除</el-button>
       </template>
     </el-table-column>
@@ -33,13 +33,19 @@
       @current-change="toPage"
       @next-click="toPage"/>
   <!--这是新增用户的弹窗-->
-  <el-dialog v-model="addUserWindows" title="添加用户" width="600" draggable>
+  <el-dialog v-model="addUserWindows" :title="addUser.id>0?'编辑用户':'添加用户'" width="600" draggable>
     <el-form :model="addUser" label-width="110px" :rules="addUserRules" ref="addUserRefForm">
       <el-form-item label="账号" prop="username">
         <el-input v-model="addUser.username"/>
       </el-form-item>
 
-      <el-form-item label="密码" prop="password">
+      <!--编辑时，将密码设置为不验证-->
+      <el-form-item label="密码" v-if="addUser.id > 0">
+        <el-input type="password" v-model="addUser.password" placeholder="空值代表不修改密码"/>
+      </el-form-item>
+
+      <!--非编辑时-->
+      <el-form-item label="密码" prop="password" v-else>
         <el-input type="password" v-model="addUser.password"/>
       </el-form-item>
 
@@ -77,7 +83,7 @@
       <div class="dialog-footer">
         <el-button @click="addUserWindows = false">取消</el-button>
         <el-button type="primary" @click="addUserSubmit">
-          添加
+          {{ addUser.id > 0 ? '编 辑' : '添 加' }}
         </el-button>
       </div>
     </template>
@@ -87,7 +93,7 @@
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPost} from "../../http/HttpRequest.js";
+import {doGet, doPost, doPut} from "../../http/HttpRequest.js";
 import {messageTip} from "../../util/util.js";
 
 export default defineComponent({
@@ -157,7 +163,8 @@ export default defineComponent({
     loadEditData(id) {
       let url = "/api/admin/sysUser/" + id
       doGet(url, {}).then((resp) => {
-        console.log(resp.data.data);
+        //console.log("this！")
+        //console.log(resp.data.data);
         if (resp.data.code === 200) {
           // 简单一点，也可以这样：
           // this.addUser = resp.data.data;
@@ -166,45 +173,14 @@ export default defineComponent({
           this.addUser.password = "";
           this.addUser.email = resp.data.data.email;
           this.addUser.mobile = resp.data.data.mobile;
-          this.addUser.roleDo = resp.data.data.roleDo;
-          this.addUser.accountNoExpired = resp.data.data.accountNoExpired == 1 ? "正常" : "已过期";
-          this.addUser.credentialsNoExpired = resp.data.data.credentialsNoExpired == 1 ? "正常" : "已过期";
-          this.addUser.accountNoLocked = resp.data.data.accountNoLocked == 1 ? "正常" : "已锁定";
-          this.addUser.accountEnabled = resp.data.data.accountEnabled == 1 ? "正常" : "未启用";
-          // 注意，如果返回的值有可能为空（null），则使用下列形式赋值
-          // this.addUser = {
-          //   ...this.addUser,
-          //   id: resp.data.data.id || '',
-          //   ownerDo: resp.data.data.ownerDo || { id: '', name: '' },
-          //   activityDo: resp.data.data.activityDo || { id: '', name: '' },
-          //   fullName: resp.data.data.fullName || '',
-          //   appellationDO: resp.data.data.appellationDO || { id: '', typeValue: '' },
-          //   phone: resp.data.data.phone || '',
-          //   weixin: resp.data.data.weixin || '',
-          //   qq: resp.data.data.qq || '',
-          //   email: resp.data.data.email || '',
-          //   age: resp.data.data.age || '',
-          //   job: resp.data.data.job || '',
-          //   yearIncome: resp.data.data.yearIncome || '',
-          //   address: resp.data.data.address || '',
-          //   needLoanDO: resp.data.data.needLoanDO || { id: '', typeValue: '' },
-          //   intentionStateDO: resp.data.data.intentionStateDO || { id: '', typeValue: '' },
-          //   intentionProductDO: resp.data.data.intentionProductDO || { id: '', name: '' },
-          //   stateDO: resp.data.data.stateDO || { id: '', typeValue: '' },
-          //   sourceDO: resp.data.data.sourceDO || { id: '', typeValue: '' },
-          //   description: resp.data.data.description || '',
-          //   nextContactTime: resp.data.data.nextContactTime || '',
-          //   createDo: resp.data.data.createDo || { id: '', name: '' },
-          //   createTime: resp.data.data.createTime || '',
-          //   editDo: resp.data.data.editDo || { id: '', name: '' },
-          //   editTime: resp.data.data.editTime || '',
-          // };
+          this.addUser.status = resp.data.data.status == 1 ? "正常" : "禁用";
+          this.addUser.roleDo = resp.data.data.roleVo;
         }
       })
     },
     loadRoleOptions() {
       doGet("/api/admin/sysRole/roles", {}).then(resp => {
-        console.log(resp.data.data)
+        //console.log(resp.data.data)
         if (resp.data.code === 200) {
           this.roleOptions = resp.data.data;
         }
@@ -221,24 +197,56 @@ export default defineComponent({
           formData.append('password', this.addUser.password);
           formData.append('email', this.addUser.email);
           formData.append('mobile', this.addUser.mobile);
-          formData.append('status', this.addUser.status);
+          formData.append('status', this.addUser.status == "正常" ? '1' : '0');
           formData.append('roleId', this.addUser.roleDo.id);
-
-          // console.log(formData);
-          doPost("/api/admin/sysUser/role", formData).then((resp) => {
-            if (resp.data.code === 200){
-              messageTip("添加用户成功！","success");
-              this.addUserWindows = false;
-              this.reload();
-            }else{
-              messageTip("添加用户失败！","error");
-            }
-          })
+          console.log(this.addUser.status)
+          if (this.addUser.id > 0) {
+            console.log("走编辑！")
+            // 修改用户
+            formData.append('id', this.addUser.id);
+            console.log(formData)
+            // 将编辑用户代码在此处写
+            doPut("/api/admin/sysUser/sysUser", formData).then((resp) => {
+              // console.log(resp.data.data);
+              if (resp.data.code === 200) {
+                messageTip("编辑用户成功！", "success");
+                this.addUserWindows = false;
+                this.reload();
+              } else {
+                messageTip("编辑用户失败！请检查输入的条件！", "error");
+              }
+            })
+          }else {
+            console.log("走添加！")
+            // 添加用户
+            // console.log(formData);
+            doPost("/api/admin/sysUser/sysUser", formData).then((resp) => {
+              if (resp.data.code === 200) {
+                messageTip("添加用户成功！", "success");
+                this.addUserWindows = false;
+                this.reload();
+              } else {
+                messageTip("添加用户失败！", "error");
+              }
+            })
+          }
         }
       })
     },
     // 新增用户
     add() {
+      this.addUser = {
+        id: 0,
+            username: "",
+            password: "",
+            email: "",
+            mobile: "",
+            status: "1",
+            roleDo: {
+          id: "",
+              typeValue: "",
+        },
+      };
       this.addUserWindows = true
     },
     // 跳转到指定 id 的用户信息界面
@@ -273,7 +281,7 @@ export default defineComponent({
     this.getData(1);
     this.loadRoleOptions();
   },
-  inject:['reload'],
+  inject: ['reload'],
 })
 
 </script>

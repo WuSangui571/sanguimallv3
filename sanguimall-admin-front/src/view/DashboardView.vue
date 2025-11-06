@@ -83,7 +83,10 @@
             <el-icon><User /></el-icon>
             个人信息
           </el-menu-item>
-
+          <el-menu-item index='/dashboard/admin/roles'>
+            <el-icon><Avatar /></el-icon>
+            角色管理
+          </el-menu-item>
         </el-sub-menu>
 
       </el-menu>

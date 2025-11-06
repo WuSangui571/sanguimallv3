@@ -3,7 +3,7 @@ package com.sangui.sanguimall.admin.web;
 
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
-import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.query.SysUserQuery;
 import com.sangui.sanguimall.admin.model.vo.SysUserVo;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.result.R;
@@ -77,12 +77,25 @@ public class SysUserController {
 
     /**
      * 新增用户
-     * @param sysRoleQuery 前端传过来的用户信息
+     * @param sysUserQuery 前端传过来的用户信息
      * @return 响应前端 o 不 ok
      */
-    @PostMapping("/role")
-    public R addUser(SysRoleQuery sysRoleQuery,Authentication authentication) {
-        int count = sysUserService.addUser(sysRoleQuery,authentication);
+    @PostMapping("/sysUser")
+    public R addUser(SysUserQuery sysUserQuery, Authentication authentication) {
+        //System.out.println("后端收到前端的新增用户请求");
+        int count = sysUserService.addUser(sysUserQuery,authentication);
         return count >= 2 ? R.ok() : R.fail();
+    }
+
+    /**
+     * 编辑用户
+     * @param sysUserQuery 前端传过来的用户信息
+     * @return 响应前端 o 不 ok
+     */
+    @PutMapping("/sysUser")
+    public R editUser(SysUserQuery sysUserQuery,Authentication authentication) {
+        //System.out.println("后端收到前端的编辑用户请求");
+        int count = sysUserService.editUser(sysUserQuery,authentication);
+        return count >= 1 ? R.ok() : R.fail();
     }
 }

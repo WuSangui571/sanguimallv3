@@ -3,7 +3,7 @@ package com.sangui.sanguimall.admin.service;
 
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
-import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.query.SysUserQuery;
 import com.sangui.sanguimall.admin.model.vo.SysUserVo;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,5 +19,7 @@ public interface SysUserService extends UserDetailsService {
 
     SysUserVo getUserDetailById(Long id);
 
-    int addUser(SysRoleQuery sysRoleQuery, Authentication authentication);
+    int addUser(SysUserQuery sysUserQuery, Authentication authentication);
+
+    int editUser(SysUserQuery userQuery, Authentication authentication);
 }

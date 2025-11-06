@@ -4,19 +4,19 @@ package com.sangui.sanguimall.admin.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.admin.manager.SysUserManager;
-import com.sangui.sanguimall.admin.mapper.SysMenuMapper;
-import com.sangui.sanguimall.admin.mapper.SysRoleMapper;
 import com.sangui.sanguimall.admin.mapper.SysUserMapper;
 import com.sangui.sanguimall.admin.model.converter.SysUserConverter;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
-import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.query.SysUserQuery;
 import com.sangui.sanguimall.admin.model.vo.SysUserVo;
 import com.sangui.sanguimall.admin.service.SysUserService;
 import com.sangui.sanguimall.constant.Constants;
 import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,9 +62,16 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public int addUser(SysRoleQuery sysRoleQuery, Authentication authentication) {
-        System.out.println("sysRoleQuery=" + sysRoleQuery);
+    public int addUser(SysUserQuery sysUserQuery, Authentication authentication) {
+        System.out.println("sysRoleQuery=" + sysUserQuery);
         System.out.println("authentication=" + authentication);
-        return sysUserManager.addUser(sysRoleQuery, authentication);
+        return sysUserManager.addUser(sysUserQuery, authentication);
+    }
+
+    @Override
+    public int editUser(SysUserQuery sysUserQuery, Authentication authentication) {
+        System.out.println("sysUserQuery=" + sysUserQuery);
+        System.out.println("authentication=" + authentication);
+        return sysUserManager.editUser(sysUserQuery,authentication);
     }
 }

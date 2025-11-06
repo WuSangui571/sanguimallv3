@@ -57,8 +57,8 @@ let router = createRouter({
                 {
                     // 子路由里面的每一个组件，都是和路由一样，path 和 component
                     // 唯一的区别是，子路由的 path 不能带斜杠
-                    path: "admin/sysUserInfo",
-                    component: () => import("../view/admin/SysUserInfoView.vue"),
+                    path: "admin/roles",
+                    component: () => import("../view/admin/SysRoles.vue"),
                 },
             ]
         },

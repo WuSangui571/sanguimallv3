@@ -10,8 +10,9 @@ import com.sangui.sanguimall.admin.model.entity.SysMenu;
 import com.sangui.sanguimall.admin.model.entity.SysRole;
 import com.sangui.sanguimall.admin.model.entity.SysUser;
 import com.sangui.sanguimall.admin.model.entity.SysUserRole;
-import com.sangui.sanguimall.admin.model.query.SysRoleQuery;
+import com.sangui.sanguimall.admin.model.query.SysUserQuery;
 import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -73,13 +74,37 @@ public class SysUserManagerImpl implements SysUserManager {
     }
 
     @Override
-    public int addUser(SysRoleQuery sysRoleQuery, Authentication authentication) {
+    public int editUser(SysUserQuery sysUserQuery, Authentication authentication) {
         SysUser sysUser = new SysUser();
-        sysUser.setUsername(sysRoleQuery.getUsername());
-        sysUser.setPassword(passwordEncoder.encode(sysRoleQuery.getPassword()));
-        sysUser.setEmail(sysRoleQuery.getEmail());
-        sysUser.setMobile(sysRoleQuery.getMobile());
-        sysUser.setStatus(sysRoleQuery.getStatus());
+        BeanUtils.copyProperties(sysUserQuery, sysUser);
+        sysUser.setUserId(sysUserQuery.getId());
+
+        Long roleId = sysUserQuery.getRoleId();
+
+        SysUserRole sysUserRole = sysUserRoleMapper.selectByUserId(sysUser.getUserId());
+        sysUserRole.setRoleId(roleId);
+        sysUserRoleMapper.updateByPrimaryKey(sysUserRole);
+
+        // 若改变密码，加密
+        if (sysUser.getPassword().isEmpty()) {
+            sysUser.setPassword(null);
+        }else if (sysUser.getPassword().length() < 6 || sysUser.getPassword().length() > 16) {
+            return 0;
+        }else{
+            sysUser.setPassword(passwordEncoder.encode(sysUser.getPassword()));
+        }
+
+        return sysUserMapper.updateByPrimaryKeySelective(sysUser);
+    }
+
+    @Override
+    public int addUser(SysUserQuery sysUserQuery, Authentication authentication) {
+        SysUser sysUser = new SysUser();
+        sysUser.setUsername(sysUserQuery.getUsername());
+        sysUser.setPassword(passwordEncoder.encode(sysUserQuery.getPassword()));
+        sysUser.setEmail(sysUserQuery.getEmail());
+        sysUser.setMobile(sysUserQuery.getMobile());
+        sysUser.setStatus(sysUserQuery.getStatus());
         sysUser.setCreateUserId(((SysUser) authentication.getPrincipal()).getUserId());
         sysUser.setCreateTime(new Date());
 
@@ -87,7 +112,7 @@ public class SysUserManagerImpl implements SysUserManager {
 
         SysUserRole sysUserRole = new SysUserRole();
         sysUserRole.setUserId(sysUser.getUserId());
-        sysUserRole.setRoleId(sysRoleQuery.getRoleId());
+        sysUserRole.setRoleId(sysUserQuery.getRoleId());
         int count2 = sysUserRoleMapper.insert(sysUserRole);
 
         return count1 + count2;
