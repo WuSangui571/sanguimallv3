@@ -94,6 +94,15 @@
         where user_id in (${ids,jdbcType=BIGINT})
     </delete>
 
+    <select id="selectUsersByRoleId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        su.*
+        from sys_user su
+        left join sys_user_role sur
+        on su.user_id = sur.user_id
+        where sur.role_id = #{roleId,jdbcType=BIGINT}
+    </select>
+
     <insert id="insert" keyColumn="user_id" keyProperty="userId"
             parameterType="com.sangui.sanguimall.admin.model.entity.SysUser" useGeneratedKeys="true">
         insert into sys_user (username, `password`, salt,

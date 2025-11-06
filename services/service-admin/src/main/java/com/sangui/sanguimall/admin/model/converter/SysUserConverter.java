@@ -3,6 +3,7 @@ package com.sangui.sanguimall.admin.model.converter;
 
 import com.sangui.sanguimall.admin.model.entity.SysUser;
 import com.sangui.sanguimall.admin.model.vo.SysUserVo;
+import com.sangui.sanguimall.admin.model.vo.UserVoForRole;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -27,4 +28,7 @@ public interface SysUserConverter {
     @Mapping(target = "username", source = "username")
     @Mapping(target = "createTime", source = "createTime")
     SysUserVo doToSimpleVo(SysUser sysUser);
+
+
+    UserVoForRole doToVo2(SysUser sysUser);
 }

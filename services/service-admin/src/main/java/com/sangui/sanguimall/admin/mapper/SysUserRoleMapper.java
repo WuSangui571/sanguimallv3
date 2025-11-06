@@ -1,5 +1,6 @@
 package com.sangui.sanguimall.admin.mapper;
 
+import com.sangui.sanguimall.admin.model.entity.SysRole;
 import com.sangui.sanguimall.admin.model.entity.SysUserRole;
 
 import java.util.List;
@@ -25,4 +26,6 @@ public interface SysUserRoleMapper {
     List<SysUserRole> selectByUserIds(String ids);
 
     int deleteByIds(String ids);
+
+    List<SysRole> selectByRoleId(Long roleId);
 }

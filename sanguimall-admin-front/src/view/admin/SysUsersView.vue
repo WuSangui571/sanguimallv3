@@ -14,6 +14,16 @@
     <el-table-column property="username" label="账号" width="180"/>
     <el-table-column property="email" label="邮箱" width="200"/>
     <el-table-column property="mobile" label="手机" width="240"/>
+    <el-table-column property="status" label="状态" width="120">
+      <template #default="scope">
+        <el-text class="mx-1" type="success" v-if="scope.row.status == 1">
+          正常
+        </el-text>
+        <el-text class="mx-1" type="danger" v-else>
+          禁用
+        </el-text>
+      </template>
+    </el-table-column>
     <el-table-column label="操作">
       <template #default="scope">
         <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
@@ -111,7 +121,7 @@ export default defineComponent({
         password: "",
         email: "",
         mobile: "",
-        status: "1",
+        status: "",
         roleDo: {
           id: "",
           typeValue: "",
@@ -218,11 +228,12 @@ export default defineComponent({
           formData.append('password', this.addUser.password);
           formData.append('email', this.addUser.email);
           formData.append('mobile', this.addUser.mobile);
-          formData.append('status', this.addUser.status == "正常" ? '1' : '0');
+
           formData.append('roleId', this.addUser.roleDo.id);
-          console.log(this.addUser.status)
+          console.log("status:" + this.addUser.status)
           if (this.addUser.id > 0) {
             console.log("走编辑！")
+            formData.append('status', this.addUser.status == "正常" ? '1' : '0');
             // 修改用户
             formData.append('id', this.addUser.id);
             console.log(formData)
@@ -239,6 +250,7 @@ export default defineComponent({
             })
           }else {
             console.log("走添加！")
+            formData.append('status', this.addUser.status);
             // 添加用户
             // console.log(formData);
             doPost("/api/admin/sysUser/sysUser", formData).then((resp) => {
@@ -247,7 +259,7 @@ export default defineComponent({
                 this.addUserWindows = false;
                 this.reload();
               } else {
-                messageTip("添加用户失败！", "error");
+                messageTip("添加用户失败！请检查输入的条件!", "error");
               }
             })
           }
@@ -262,7 +274,7 @@ export default defineComponent({
             password: "",
             email: "",
             mobile: "",
-            status: "1",
+            status: "",
             roleDo: {
           id: "",
               typeValue: "",
@@ -322,6 +334,7 @@ export default defineComponent({
         // 当前页
         current: current
       }).then(resp => {
+        console.log("!!!!!!!!!")
         console.log(resp)
         if (resp.data.code === 200) {
           this.sysUserList = resp.data.data.list;

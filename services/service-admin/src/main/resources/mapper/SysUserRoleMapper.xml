@@ -11,6 +11,12 @@
         , user_id, role_id
     </sql>
 
+    <select id="selectByRoleId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user_role
+        where role_id = #{ids,jdbcType=BIGINT}
+    </select>
     <select id="selectByUserIds" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

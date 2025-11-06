@@ -134,6 +134,7 @@ public class SysUserManagerImpl implements SysUserManager {
         sysUser.setPassword(passwordEncoder.encode(sysUserQuery.getPassword()));
         sysUser.setEmail(sysUserQuery.getEmail());
         sysUser.setMobile(sysUserQuery.getMobile());
+        System.out.println("sysUserQuery.getStatus()=" + sysUserQuery.getStatus());
         sysUser.setStatus(sysUserQuery.getStatus());
         sysUser.setCreateUserId(((SysUser) authentication.getPrincipal()).getUserId());
         sysUser.setCreateTime(new Date());

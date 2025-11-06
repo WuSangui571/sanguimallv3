@@ -1,6 +1,7 @@
 package com.sangui.sanguimall.admin.mapper;
 
 import com.sangui.sanguimall.admin.model.entity.SysRole;
+import com.sangui.sanguimall.admin.model.entity.SysUser;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface SysRoleMapper {
     List<SysRole> selectByUserId(Long userId);
 
     List<SysRole> selectAll();
+
+    List<SysUser> selectUsersByRoleId(Long roleId);
 }
