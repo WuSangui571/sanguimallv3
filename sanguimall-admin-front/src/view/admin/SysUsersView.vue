@@ -1,7 +1,35 @@
 <template>
-  <!--两个按钮-->
-  <el-button type="primary" @click="add">添加用户</el-button>
-  <el-button type="danger" @click="batchDel">批量删除</el-button>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <!--两个按钮-->
+    <el-button type="primary" @click="add">添加用户</el-button>
+    <el-button type="danger" @click="batchDel">批量删除</el-button>
+    <div class="mySearch">
+      <el-form :model="searchUser" :rules="searchUserRules" ref="searchUserRefForm">
+<!--      <el-form :model="searchUser">-->
+        <el-form-item prop="selectValue">
+          <el-input
+              v-model="searchUser.selectValue"
+              style="max-width: 600px"
+              placeholder="请输入具体的模糊查询"
+              class="input-with-select"
+          >
+            <template #prepend>
+              <el-select v-model="searchUser.selectKey" placeholder="请选择" style="width: 115px">
+                <el-option label="账号" value="username"/>
+                <el-option label="邮箱" value="email"/>
+                <el-option label="手机" value="mobile"/>
+              </el-select>
+            </template>
+            <template #append>
+              <el-button :icon="Search" @click="submitSearch"/>
+            </template>
+          </el-input>
+        </el-form-item>
+      </el-form>
+    </div>
+    <el-button type="success" @click="reFlash">重置</el-button>
+  </div>
+
   <!--表格开始-->
   <el-table
       :data="sysUserList"
@@ -105,11 +133,28 @@
 import {defineComponent} from "vue";
 import {doDelete, doGet, doPost, doPut} from "../../http/HttpRequest.js";
 import {messageConfirm, messageTip} from "../../util/util.js";
+import {Search} from "@element-plus/icons-vue";
 
 export default defineComponent({
   name: "SysUsersView",
+  computed: {
+    Search() {
+      return Search
+    }
+  },
   data() {
     return {
+      select: [],
+      searchUser: {
+        selectKey: "",
+        selectValue:"",
+      },
+      searchUserRules: {
+        selectValue: [
+          {max: 16, message: '查询条件在 16 个字符之内', trigger: 'blur'},
+        ],
+      },
+      isSearch:false,
       // 定义 List 对象
       sysUserList: [{}],
       myPageSize: 0,
@@ -166,7 +211,32 @@ export default defineComponent({
     }
   },
   methods: {
+    submitSearch(){
+      let selectKey = this.searchUser.selectKey;
+      let selectValue = this.searchUser.selectValue;
 
+      if (selectKey === "" && selectValue === ""){
+        messageTip("请输入查询条件！","error")
+        return;
+      }
+      if (selectKey === ""){
+        messageTip("请输入要查询的字段！","error")
+        return;
+      }
+      if (selectValue === ""){
+        messageTip("请输入具体的模糊查询！","error")
+        return;
+      }
+      this.$refs.searchUserRefForm.validate((isValid) => {
+        if (isValid) {
+          this.isSearch = true;
+          this.getData(1);
+        }
+      })
+    },
+    reFlash(){
+      this.$router.go(0);
+    },
     // 删除指定用户
     del(id, name) {
       messageConfirm("确认删除 " + name + " 吗？", "温馨提示").then(() => {
@@ -248,7 +318,7 @@ export default defineComponent({
                 messageTip("编辑用户失败！请检查输入的条件！", "error");
               }
             })
-          }else {
+          } else {
             console.log("走添加！")
             formData.append('status', this.addUser.status);
             // 添加用户
@@ -270,14 +340,14 @@ export default defineComponent({
     add() {
       this.addUser = {
         id: 0,
-            username: "",
-            password: "",
-            email: "",
-            mobile: "",
-            status: "",
-            roleDo: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: "",
+        status: "",
+        roleDo: {
           id: "",
-              typeValue: "",
+          typeValue: "",
         },
       };
       this.addUserWindows = true
@@ -330,18 +400,37 @@ export default defineComponent({
     },
     // 查询用户列表数据
     getData(current) {
-      doGet("/api/admin/sysUser/sysUsers", {
-        // 当前页
-        current: current
-      }).then(resp => {
-        console.log("!!!!!!!!!")
-        console.log(resp)
-        if (resp.data.code === 200) {
-          this.sysUserList = resp.data.data.list;
-          this.myTotal = resp.data.data.total;
-          this.myPageSize = resp.data.data.pageSize;
-        }
-      })
+      if (this.isSearch){
+        // console.log(formData);
+        doGet("/api/admin/sysUser/searchUser", {
+          current: current,
+          selectKey:this.searchUser.selectKey,
+          selectValue:this.searchUser.selectValue,
+        }).then((resp) => {
+          if (resp.data.code === 200){
+            console.log(resp.data.data.list);
+            this.sysUserList = resp.data.data.list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+            messageTip("查询成功！","success");
+          }else{
+            messageTip("查询失败！","error");
+          }
+        })
+      }else {
+        doGet("/api/admin/sysUser/sysUsers", {
+          // 当前页
+          current: current
+        }).then(resp => {
+          console.log("!!!!!!!!!")
+          console.log(resp)
+          if (resp.data.code === 200) {
+            this.sysUserList = resp.data.data.list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+          }
+        })
+      }
     },
   },
   mounted() {
@@ -359,6 +448,15 @@ export default defineComponent({
 }
 
 .el-pagination {
+  margin-top: 20px;
+}
+
+.input-with-select .el-input-group__prepend {
+  background-color: var(--el-fill-color-blank);
+}
+
+.mySearch {
+  margin-left: 10px;
   margin-top: 20px;
 }
 </style>

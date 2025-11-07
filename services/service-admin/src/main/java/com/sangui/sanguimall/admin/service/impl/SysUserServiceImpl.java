@@ -54,6 +54,16 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public PageInfo<SysUser> getSysUsersBySearch(Integer current, String selectKey, String selectValue) {
+        // 1. 设置 PageHelper
+        PageHelper.startPage(current, Constants.PAGE_SIZE);
+        // 2. 查询
+        List<SysUser> list = sysUserMapper.selectSysUsersBySearch(selectKey,selectValue);
+        // 3. 封装分页数据到 PageInfo
+        return new PageInfo<>(list);
+    }
+
+    @Override
     public SysUserVo getUserDetailById(Long id) {
 
         SysUser sysUser = sysUserMapper.selectByIdWithCreateUserNameAndRole(id);
@@ -84,4 +94,6 @@ public class SysUserServiceImpl implements SysUserService {
     public int delUserById(Long id) {
         return sysUserManager.delUserById(id);
     }
+
+
 }

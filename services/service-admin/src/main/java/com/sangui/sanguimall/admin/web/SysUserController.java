@@ -26,22 +26,24 @@ public class SysUserController {
 
     /**
      * 判断是否可以免密登录
+     *
      * @return 判断结果
      */
     @GetMapping("/freeLogin")
-    public R freeLogin(){
+    public R freeLogin() {
         // TokenVerifyFilter 会自动验证，这里不需要验证
-        return  R.ok();
+        return R.ok();
     }
 
     /**
      * 获取登录人信息
+     *
      * @param authentication 注入的 SpringSecurity 的信息
      * @return 包含当前登录人 tUser 对象信息的响应
      */
     //@PreAuthorize("hasAuthority('sys:user:info')")
     @GetMapping("/info")
-    public R getLoginInfo(Authentication authentication){
+    public R getLoginInfo(Authentication authentication) {
         //System.out.println("login info 's authentication:" + authentication);
         SysUser sysUser = (SysUser) authentication.getPrincipal();
         return R.ok(sysUser);
@@ -49,13 +51,14 @@ public class SysUserController {
 
     /**
      * 获取全部用户的信息
+     *
      * @param current 当前页数
      * @return 当前页数的用户信息
      */
     @PreAuthorize("hasAuthority('sys:user:list')")
     @GetMapping("/sysUsers")
-    public R getUsers(@RequestParam(value = "current",required = false)Integer current){
-        if (current == null){
+    public R getUsers(@RequestParam(value = "current", required = false) Integer current) {
+        if (current == null) {
             current = 1;
         }
         PageInfo<SysUser> pageInfo = sysUserService.getSysUsersByPage(current);
@@ -63,43 +66,61 @@ public class SysUserController {
         return R.ok(pageInfo);
     }
 
+    @GetMapping("/searchUser")
+    public R getSysUsersBySearch(@RequestParam(value = "current", required = false) Integer current,
+                                 @RequestParam(value = "selectKey") String selectKey,
+                                 @RequestParam(value = "selectValue") String selectValue) {
+        if (current == null) {
+            current = 1;
+        }
+        PageInfo<SysUser> pageInfo = sysUserService.getSysUsersBySearch(current, selectKey, selectValue);
+
+        return R.ok(pageInfo);
+    }
+
+
     /**
      * 响应给前端指定 id 的用户信息
+     *
      * @param id 用户 id
      * @return 用户信息
      */
     @GetMapping("/{id}")
-    public R getUserDetail(@PathVariable("id")Long id){
+    public R getUserDetail(@PathVariable("id") Long id) {
         SysUserVo sysUserVo = sysUserService.getUserDetailById(id);
-        System.out.println("sysUserVo= "+ sysUserVo);
+        System.out.println("sysUserVo= " + sysUserVo);
         return R.ok(sysUserVo);
     }
 
     /**
      * 新增用户
+     *
      * @param sysUserQuery 前端传过来的用户信息
      * @return 响应前端 o 不 ok
      */
     @PostMapping("/sysUser")
     public R addUser(SysUserQuery sysUserQuery, Authentication authentication) {
         //System.out.println("后端收到前端的新增用户请求");
-        int count = sysUserService.addUser(sysUserQuery,authentication);
+        int count = sysUserService.addUser(sysUserQuery, authentication);
         return count >= 2 ? R.ok() : R.fail();
     }
 
     /**
      * 编辑用户
+     *
      * @param sysUserQuery 前端传过来的用户信息
      * @return 响应前端 o 不 ok
      */
     @PutMapping("/sysUser")
-    public R editUser(SysUserQuery sysUserQuery,Authentication authentication) {
+    public R editUser(SysUserQuery sysUserQuery, Authentication authentication) {
         //System.out.println("后端收到前端的编辑用户请求");
-        int count = sysUserService.editUser(sysUserQuery,authentication);
+        int count = sysUserService.editUser(sysUserQuery, authentication);
         return count >= 1 ? R.ok() : R.fail();
     }
+
     /**
      * 删除用户
+     *
      * @param id 前端传过来的指定 id 的用户
      * @return 响应前端 o 不 ok
      */
@@ -111,6 +132,7 @@ public class SysUserController {
 
     /**
      * 批量删除用户
+     *
      * @param ids id 字符串，类似 "2,4,5"
      * @return 响应前端 o 不 ok
      */

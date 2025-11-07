@@ -1,6 +1,7 @@
 package com.sangui.sanguimall.admin.mapper;
 
 import com.sangui.sanguimall.admin.model.entity.SysUser;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -32,4 +33,6 @@ public interface SysUserMapper {
     int deleteByIds(String ids);
 
     List<SysUser> selectUsersByRoleId(Long roleId);
+
+    List<SysUser> selectSysUsersBySearch(@Param("selectKey") String selectKey, @Param("selectValue") String selectValue);
 }

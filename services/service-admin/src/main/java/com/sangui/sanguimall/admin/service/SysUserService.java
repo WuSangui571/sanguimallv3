@@ -26,4 +26,6 @@ public interface SysUserService extends UserDetailsService {
     int delUserByIds(String ids);
 
     int delUserById(Long id);
+
+    PageInfo<SysUser> getSysUsersBySearch(Integer current, String selectKey, String selectValue);
 }
