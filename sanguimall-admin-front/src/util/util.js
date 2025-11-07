@@ -68,6 +68,17 @@ export function messageConfirm(msg,title){
     )
 }
 
+export function messageAlert(msg,title){
+    return ElMessageBox.alert(
+        title,
+        msg,
+        {
+            confirmButtonText: '确认',
+            type: '',
+        }
+    )
+}
+
 /**
  * 返回方法，添加路由之后方可使用
  */

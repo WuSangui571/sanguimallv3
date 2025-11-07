@@ -17,6 +17,17 @@
     </modules>
 
     <dependencies>
+        <!--阿里云云存储-->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.cloud</groupId>-->
+<!--            <artifactId>aliyun-oss-spring-boot-starter</artifactId>-->
+<!--        </dependency>-->
+        <!--阿里云云存储原生-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.18.3</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>

@@ -31,40 +31,32 @@ let router = createRouter({
             // 子路由，子路由可以是多个，所以是数组
             children: [
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "index",
                     component: () => import("../view/IndexView.vue"),
                 },
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "product/category",
                     component: () => import("../view/product/CategoryView.vue"),
                 },
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "admin/sysUsers",
                     component: () => import("../view/admin/SysUsersView.vue"),
                 },
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "admin/sysUser/:id",
                     component: () => import("../view/admin/SysUserDetailView.vue"),
                 },
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "admin/roles",
                     component: () => import("../view/admin/SysRolesView.vue"),
                 },
                 {
-                    // 子路由里面的每一个组件，都是和路由一样，path 和 component
-                    // 唯一的区别是，子路由的 path 不能带斜杠
                     path: "admin/role/:id",
                     component: () => import("../view/admin/SysRoleDetailView.vue"),
+                },
+                {
+                    path: "product/brand",
+                    component: () => import("../view/product/BrandView.vue"),
                 },
             ]
         },

@@ -35,7 +35,7 @@
             </el-icon>
             分类维护
           </el-menu-item>
-          <el-menu-item index="3-2">
+          <el-menu-item index="/dashboard/product/brand">
             <el-icon>
               <CollectionTag/>
             </el-icon>
