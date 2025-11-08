@@ -14,14 +14,15 @@
     <modules>
         <module>service-product</module>
         <module>service-admin</module>
+        <module>service-third-party</module>
     </modules>
 
     <dependencies>
         <!--阿里云云存储-->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud</groupId>-->
-<!--            <artifactId>aliyun-oss-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>aliyun-oss-spring-boot-starter</artifactId>
+        </dependency>
         <!--阿里云云存储原生-->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
@@ -48,11 +49,6 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.projectlombok</groupId>-->
-<!--            <artifactId>lombok</artifactId>-->
-<!--        </dependency>-->
         <!--加入 common 依赖-->
         <dependency>
             <groupId>com.sangui</groupId>
@@ -97,6 +93,19 @@
             <version>4.0.3</version>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>aliyun-spring-boot-dependencies</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
     <artifactId>services</artifactId>
 
