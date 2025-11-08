@@ -2,7 +2,6 @@
   <!--两个按钮-->
   <el-button type="primary">添加品牌</el-button>
   <el-button type="danger">批量删除</el-button>
-  <el-button type="primary" @click="testOss">测试oss端连通性</el-button>
   <!--表格开始-->
   <el-table
       :data="brandList"
@@ -62,32 +61,33 @@
 
   <div>
     <el-upload
-        v-model:file-list="fileList"
         class="upload-demo"
         :http-request="customUpload"
         action="#"
-    multiple
-    :on-preview="handlePreview"
-    :on-remove="handleRemove"
-    :before-remove="beforeRemove"
-    :limit="3"
-    :on-exceed="handleExceed"
-    :file-list="fileList"
+        :show-file-list="false"
+        :limit="1"
+        :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"
     >
-    <el-button type="primary">Click to upload</el-button>
-    <template #tip>
-      <div class="el-upload__tip">
-        jpg/png files with a size less than 500KB.
-      </div>
-    </template>
+      <el-button type="primary">点击上传图片</el-button>
+      <template #tip>
+        <div class="el-upload__tip">
+          jpg/png files with a size less than 10MB.
+        </div>
+      </template>
     </el-upload>
+    <div v-if="uploadedImageUrl" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
+      <span style="color: #67c23a; font-weight: 500;">已上传：</span>
+      <el-image :src="uploadedImageUrl" style="width: 80px; height: 80px;" fit="cover"/>
+      <el-button size="small" type="text" @click="copyUrl">复制路径</el-button>
+      <el-button size="small" type="danger" @click="clearUploaded">清除</el-button>
+    </div>
   </div>
 </template>
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPost, doPut} from "../../http/HttpRequest.js";
-import {messageAlert, messageTip} from "../../util/util.js";
+import {doGet, doPut} from "../../http/HttpRequest.js";
+import {getUUID, messageAlert, messageTip} from "../../util/util.js";
 
 export default defineComponent({
   name: "BrandView",
@@ -105,31 +105,19 @@ export default defineComponent({
       }],
       myPageSize: 0,
       myTotal: 0,
-      fileList: [
-        // 可选：初始示例文件（可删除）
-        // {
-        //   name: 'example.jpg',
-        //   url: 'https://fuss10.elemecdn.com/3/63/4b8a...
-        // }
-      ]
+      // 修改3：新增变量，保存上传成功的完整 URL
+      uploadedImageUrl: '',  // 例如: https://xxx.com/test06/abc123.jpg
     }
   },
 
   methods: {
-    testOss() {
-      doGet("/api/thirdParty/oss/test", {}).then(resp => {
-        if (resp.data.code === 200) {
-          messageTip("success!", "success")
-        } else {
-          messageTip("no!", "error")
-        }
-      })
-    },
-
+    messageTip,
+    // 自定义上传：核心！直传 OSS
     // 自定义上传：核心！直传 OSS
     customUpload(params) {
       const file = params.file;
 
+      // 校验
       if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
         messageTip('只能上传 jpg/png 文件!', 'error');
         return Promise.reject();
@@ -144,60 +132,56 @@ export default defineComponent({
             const data = resp.data.data;
             const uploadUrl = `//${data.host.split('://')[1]}`;
 
+            // 生成唯一文件名
+            const uuid = getUUID();
+            const fileExt = file.name.split('.').pop();
+            const ossFileName = `${uuid}.${fileExt}`;  // 例如: abc123.jpg
+
             const formData = new FormData();
-            formData.append('key', data.dir + file.name);
+            formData.append('key', data.dir + ossFileName);
             formData.append('OSSAccessKeyId', data.accessKeyId);
             formData.append('policy', data.policy);
             formData.append('signature', data.signature);
             formData.append('success_action_status', '200');
             formData.append('file', file);
 
-            return fetch(uploadUrl, { method: 'POST', body: formData }).then(response => ({
+            // 修改5：把 ossFileName 传到下一个 then
+            return fetch(uploadUrl, {method: 'POST', body: formData}).then(response => ({
               response,
               data,
-              file
+              ossFileName  // 关键！传下去
             }));
           })
-          .then(({ response, data, file }) => {
+          .then(({response, data, ossFileName}) => {
             if (response.ok) {
-              const finalUrl = `https://sanguimall-test.oss-cn-beijing.aliyuncs.com/${data.dir}${file.name}`;
+              // 修改6：拼接完整 URL 并保存到变量
+              const finalUrl = `${data.baseUrl}/${data.dir}${ossFileName}`;
+              this.uploadedImageUrl = finalUrl;  // 保存！
+
               messageTip('上传成功！', 'success');
-              params.onSuccess({ url: finalUrl }, file);
+              params.onSuccess({url: finalUrl}, params.file);
             } else {
-              return response.text().then(text => { throw new Error(text); });
+              return response.text().then(text => {
+                throw new Error(text);
+              });
             }
           })
+          .catch(err => {
+            messageTip('上传失败: ' + err.message, 'error');
+            params.onError(err, params.file);
+          });
+    },
+    // 修改7：新增方法：复制路径
+    copyUrl() {
+      navigator.clipboard.writeText(this.uploadedImageUrl).then(() => {
+        messageTip('路径已复制到剪贴板', 'success');
+      });
     },
 
-    // 点击文件预览
-    handlePreview(uploadFile) {
-      if (uploadFile.url) {
-        window.open(uploadFile.url, '_blank')
-      } else {
-        messageTip('文件尚未上传完成', 'warning')
-      }
-    },
-
-    // 删除文件
-    handleRemove(file, uploadFiles) {
-      console.log('删除:', file, uploadFiles)
-      this.fileList = uploadFiles
-    },
-
-    // 删除前确认
-    beforeRemove(uploadFile) {
-      return ElMessageBox.confirm(`确定移除 ${uploadFile.name} ?`).then(
-          () => true,
-          () => false
-      )
-    },
-
-    // 超出限制
-    handleExceed(files, uploadFiles) {
-      messageTip(
-          `限制最多 3 个文件，你本次选择了 ${files.length} 个文件，共 ${files.length + uploadFiles.length} 个`,
-          'warning'
-      )
+    // 修改8：新增方法：清除已上传
+    clearUploaded() {
+      this.uploadedImageUrl = '';
+      messageTip('已清除', 'info');
     },
 
     // ... 你的其他 methods ...
@@ -266,6 +250,7 @@ export default defineComponent({
 .el-pagination {
   margin-top: 20px;
 }
+
 .upload-demo {
   margin-top: 20px;
 }

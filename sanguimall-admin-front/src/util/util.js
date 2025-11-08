@@ -157,3 +157,25 @@ export function waitFor(conditionFn, interval = 50) {
         }
     })
 }
+
+// 一个标准的 UUID v4 字符串
+//   示例: "6ec0bd7f-11c0-43da-975e-2a8ad9e6d7a5"
+export function getUUID() {
+    const cryptoObj = window.crypto || window.msCrypto;
+    if (cryptoObj && cryptoObj.getRandomValues) {
+        const buf = new Uint8Array(16);
+        cryptoObj.getRandomValues(buf);
+        buf[6] = (buf[6] & 0x0f) | 0x40; // version 4
+        buf[8] = (buf[8] & 0x3f) | 0x80; // variant 10
+        const hex = Array.from(buf)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    }
+    // 降级（极少使用）
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
