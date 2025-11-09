@@ -43,20 +43,7 @@ public class OssController {
 
     @GetMapping("/getSignedUrl")
     public R getSignedUrl(@RequestParam(value = "uploadedImageUrl") String uploadedImageUrl) {
-        String endpoint = "oss-cn-beijing.aliyuncs.com";
-        String accessKeyId = System.getenv("OSS_ACCESS_KEY_ID");
-        String accessKeySecret = System.getenv("OSS_ACCESS_KEY_SECRET");
-        String bucketName = "sanguimall-test";
-
-
-
-        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
-
-        // 设置过期时间：300秒 （可配置）
-        Date expiration = new Date(System.currentTimeMillis() + 300 * 1000L);
-        URL url = ossClient.generatePresignedUrl(bucketName, uploadedImageUrl, expiration);
-        ossClient.shutdown();
-        System.out.println("后端返回的最终 url = "+ url.toString());
-        return R.ok(url.toString());
+        String url = ossService.getSignedUrl(uploadedImageUrl);
+        return R.ok(url);
     }
 }

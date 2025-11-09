@@ -1,6 +1,8 @@
 package com.sangui.sanguimall.thirdparty.oss.service.impl;
 
 
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sangui.sanguimall.thirdparty.oss.service.OssService;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -60,12 +63,18 @@ public class OssServiceImpl implements OssService {
         resp.put("baseUrl", "https://" + BUCKET + "." + ENDPOINT);
         resp.put("signature", signature);
         resp.put("accessKeyId", ACCESS_KEY_ID);
-//        System.out.println("host=" + "http://" + BUCKET + "." + ENDPOINT);
-//        System.out.println("dir=" + dir);
-//        System.out.println("policy=" + encodedPolicy);
-//        System.out.println("baseUrl=" + "https://" + BUCKET + "." + ENDPOINT);
-//        System.out.println("signature=" + signature);
-//        System.out.println("accessKeyId=" + ACCESS_KEY_ID);
         return resp;
+    }
+
+    @Override
+    public String getSignedUrl(String uploadedImageUrl) {
+        OSS ossClient = new OSSClientBuilder().build(ENDPOINT, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+
+        // 设置过期时间：300秒 （可配置）
+        Date expiration = new Date(System.currentTimeMillis() + 300 * 1000L);
+        URL url = ossClient.generatePresignedUrl(BUCKET, uploadedImageUrl, expiration);
+        ossClient.shutdown();
+        System.out.println("后端返回的最终 url = " + url.toString());
+        return url.toString();
     }
 }

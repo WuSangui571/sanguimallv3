@@ -15,4 +15,6 @@ import java.util.Map;
  */
 public interface OssService {
     Map<String, String> getPolicy(String dir) throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeyException;
+
+    String getSignedUrl(String uploadedImageUrl);
 }

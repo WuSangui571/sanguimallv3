@@ -1,6 +1,6 @@
 <template>
   <!--两个按钮-->
-  <el-button type="primary">添加品牌</el-button>
+  <el-button type="primary" @click="add">添加品牌</el-button>
   <el-button type="danger">批量删除</el-button>
   <!--表格开始-->
   <el-table
@@ -11,7 +11,7 @@
     <!--若 type 为 id，则该字段会自动增长-->
     <el-table-column type="index" label="序号" width="60"/>
 
-    <el-table-column label="logo" width="200">
+    <el-table-column label="LOGO" width="240">
       <template #default="scope">
         <el-image
 
@@ -21,7 +21,19 @@
       </template>
     </el-table-column>
     <el-table-column property="name" label="品牌名" width="120"/>
-    <el-table-column property="descript" label="介绍" width="300">
+    <el-table-column property="showStatus" label="显示状态" width="120">
+      <template #default="scope">
+        <el-switch
+            :model-value="scope.row.showStatus === 1"
+            @change="val => handleShowStatusChange(scope.row.brandId, val,scope.row.name)"
+            class="ml-2"
+            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+        />
+      </template>
+    </el-table-column>
+    <el-table-column property="firstLetter" label="检索首字母" width="100"/>
+    <el-table-column property="sort" label="排序" width="90"/>
+    <el-table-column property="descript" label="介绍" width="400">
       <template #default="scope">
       <span
           class="clickable-text"
@@ -32,18 +44,6 @@
       </template>
     </el-table-column>
 
-    <el-table-column property="firstLetter" label="检索首字母" width="120"/>
-    <el-table-column property="sort" label="排序"/>
-    <el-table-column property="showStatus" label="显示状态" width="240">
-      <template #default="scope">
-        <el-switch
-            :model-value="scope.row.showStatus === 1"
-            @change="val => handleShowStatusChange(scope.row.brandId, val)"
-            class="ml-2"
-            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-        />
-      </template>
-    </el-table-column>
     <el-table-column label="操作">
       <el-button type="warning">编辑</el-button>
       <el-button type="danger">删除</el-button>
@@ -58,30 +58,92 @@
       @prev-click="toPage"
       @current-change="toPage"
       @next-click="toPage"/>
+  <!--测试的上传按钮-->
+  <!--  <div>-->
+  <!--    <el-upload-->
+  <!--        class="upload-demo"-->
+  <!--        :http-request="customUpload"-->
+  <!--        action="#"-->
+  <!--        :show-file-list="false"-->
+  <!--        :limit="1"-->
+  <!--        :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"-->
+  <!--    >-->
+  <!--      <el-button type="primary">点击上传图片</el-button>-->
+  <!--      <template #tip>-->
+  <!--        <div class="el-upload__tip">-->
+  <!--          仅至此 jpg/png 格式，且文件大小小于 10MB-->
+  <!--        </div>-->
+  <!--      </template>-->
+  <!--    </el-upload>-->
 
-  <div>
-    <el-upload
-        class="upload-demo"
-        :http-request="customUpload"
-        action="#"
-        :show-file-list="false"
-        :limit="1"
-        :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"
-    >
-      <el-button type="primary">点击上传图片</el-button>
-      <template #tip>
-        <div class="el-upload__tip">
-          jpg/png files with a size less than 10MB.
+  <!--  </div>-->
+  <!--这是新增品牌的弹窗-->
+  <el-dialog v-model="addBrandWindows" title="添加品牌" width="600" draggable>
+    <el-form :model="addBrand" label-width="110px" :rules="addBrandRules" ref="addBrandRefForm">
+      <el-form-item label="品牌名" prop="name">
+        <el-input v-model="addBrand.name"/>
+      </el-form-item>
+
+      <el-form-item label="logo" prop="logoVo.savedLogo">
+        <!--        <el-input v-model="addBrand.logoVo.signedLogo" />-->
+        <el-upload
+            ref="logoUpload"
+            class="upload-demo"
+            :http-request="customUpload"
+            action="#"
+            :show-file-list="false"
+            :limit="1"
+            :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"
+            v-if="!uploadedImageUrl"
+        >
+          <el-button type="primary">点击上传图片</el-button>
+          <template #tip>
+            <div class="el-upload__tip" v-if="!uploadedImageUrl">
+              仅支持 jpg/png 格式，且图片大小小于 10MB
+            </div>
+          </template>
+        </el-upload>
+        <!--上传完成之后的预览 div-->
+        <div v-if="uploadedImageUrl" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
+          <!--          <span style="color: #67c23a; font-weight: 500;">已上传：</span>-->
+          <el-image :src="signedImageUrl" style="width: 200px;" fit="fill"/>
+          <!--          <el-button size="small" type="text" @click="copyUrl">复制路径</el-button>-->
+          <el-button size="small" type="danger" @click="clearUploaded">清除</el-button>
         </div>
-      </template>
-    </el-upload>
-    <div v-if="uploadedImageUrl" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
-      <span style="color: #67c23a; font-weight: 500;">已上传：</span>
-      <el-image :src="signedImageUrl" style="width: 80px; height: 80px;" fit="cover"/>
-      <el-button size="small" type="text" @click="copyUrl">复制路径</el-button>
-      <el-button size="small" type="danger" @click="clearUploaded">清除</el-button>
-    </div>
-  </div>
+      </el-form-item>
+
+      <el-form-item label="显示状态" prop="showStatus">
+        <el-switch
+            v-model="addBrand.showStatus"
+            :active-value="1"
+            :inactive-value="0"
+            class="ml-2"
+            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+        />
+      </el-form-item>
+
+      <el-form-item label="检索首字母" prop="firstLetter">
+        <el-input v-model="addBrand.firstLetter"/>
+      </el-form-item>
+
+      <el-form-item label="排序" prop="sort">
+        <el-input v-model="addBrand.sort"/>
+      </el-form-item>
+
+      <el-form-item label="介绍" prop="descript">
+        <el-input v-model="addBrand.descript" type="textarea"/>
+      </el-form-item>
+
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="addBrandWindows = false">取消</el-button>
+        <el-button type="primary" @click="addBrandSubmit">
+          添加
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -109,11 +171,58 @@ export default defineComponent({
       uploadedImageUrl: '',
       // 进过签名验证的完整 URL，该路径可直接预览
       signedImageUrl: '',
+      addBrandWindows: false,
+      addBrand: {
+        id: 0,
+        name: "",
+        logoVo: {
+          savedLogo: "",
+          signedLogo: ""
+        },
+        showStatus: 1,
+        firstLetter: "",
+        sort: 0,
+        descript: "",
+      },
+      addBrandRules: {
+        name: [
+          {required: true, message: '请输入品牌名！', trigger: 'blur'},
+          {max: 50, message: '品牌名在 50字符 之内！', trigger: 'blur'},
+        ],
+        'logoVo.savedLogo': [
+          {required: true, message: '请上传品牌logo！', trigger: 'blur'}
+        ],
 
+        firstLetter: [
+          {required: true, message: '请输入检索首字母！', trigger: 'blur'},
+          {
+            pattern: /^[A-Z]$/,
+            message: '必须是单个大写英文字母！',
+            trigger: 'blur'
+          },
+        ],
+        sort: [
+          {required: true, message: '请输入排序！', trigger: 'blur'},
+          {pattern: /^[1-9]\d{0,2}$/, message: '排序必须是大于0，小于1000的整数！', trigger: 'blur'}
+        ],
+        descript: [
+          {required: true, message: '请输入品牌介绍！', trigger: 'blur'},
+          {max: 500, message: '品牌介绍在 500字符 之内！', trigger: 'blur'},
+        ],
+      },
     }
   },
 
   methods: {
+    // 提交新增品牌
+    addBrandSubmit() {
+      this.addBrandWindows = false
+      // ...
+    },
+    // 新增品牌
+    add() {
+      this.addBrandWindows = true
+    },
     messageTip,
     customUpload(params) {
       const file = params.file;
@@ -128,7 +237,8 @@ export default defineComponent({
         return Promise.reject();
       }
       doGet("/api/thirdParty/oss/getPolicy", {
-        dir: "test7/"
+        //dir: "product/brand/logo/"
+        dir: "test/"
       }).then(resp => {
         if (resp.data.code === 200) {
           const data = resp.data.data;
@@ -155,7 +265,7 @@ export default defineComponent({
               const finalUrl = `${data.baseUrl}/${data.dir}${ossFileName}`;
               // 并保存到变量
               this.uploadedImageUrl = data.dir + ossFileName;
-              params.onSuccess({url: finalUrl}, params.file);
+              params.onSuccess({url: this.uploadedImageUrl}, params.file);
 
               this.getSignedImageUrl(data.dir + ossFileName);
 
@@ -179,8 +289,19 @@ export default defineComponent({
 
     // 修改8：新增方法：清除已上传
     clearUploaded() {
+      // 如果 ref 存在，就清空 el-upload 内部 fileList
+      const uploadComp = this.$refs.logoUpload;
+      if (uploadComp && typeof uploadComp.clearFiles === 'function') {
+        uploadComp.clearFiles();
+      }
+      // 业务变量也清空
       this.uploadedImageUrl = '';
       this.signedImageUrl = '';
+      // 如果你想连带清空 addBrand.logoVo 的字段：
+      if (this.addBrand && this.addBrand.logoVo) {
+        this.addBrand.logoVo.savedLogo = '';
+        this.addBrand.logoVo.signedLogo = '';
+      }
       messageTip('已清除', 'info');
     },
 
@@ -196,14 +317,20 @@ export default defineComponent({
       })
     },
 
-    handleShowStatusChange(brandId, flag) {
+    handleShowStatusChange(brandId, flag, name) {
       let formData = new FormData();
       formData.append("brandId", brandId)
       formData.append("flag", flag)
       doPut("/api/product/brand/brandStatus", formData).then((resp) => {
         if (resp.data.code === 200) {
-          let messageStr = "已改为[" + (flag === true ? "显示" : "不显示") + "]状态！"
-          messageTip(messageStr, "success");
+          if (flag) {
+            let messageStr = "[" + name + "] 已改为 [显示] 状态！"
+            messageTip(messageStr, "success");
+          } else {
+            let messageStr = "[" + name + "] 已改为 [不显示] 状态！"
+            messageTip(messageStr, "error");
+          }
+
           this.reload();
         } else {
           messageTip("修改失败！未知错误！", "error");
@@ -215,7 +342,7 @@ export default defineComponent({
     },
     // 获取成员名称，超长截断
     getDescript(descript) {
-      const maxLength = 30; // 超过20个字符就截断
+      const maxLength = 55; // 超过20个字符就截断
       if (descript.length > maxLength) {
         return descript.slice(0, maxLength) + '...';
       }
