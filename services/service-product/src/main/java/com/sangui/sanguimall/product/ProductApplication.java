@@ -4,6 +4,7 @@ package com.sangui.sanguimall.product;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * @Author: sangui
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Description: 商品微服务的主入口程序
  * @Version: 1.0
  */
+@EnableFeignClients
 @SpringBootApplication
 @MapperScan("com.sangui.sanguimall.product.mapper")
 public class ProductApplication {

@@ -6,11 +6,13 @@
 
 启动项目流程：
 
-1. 开启 Nacos
+1. 配置 MySql
 
-2. 开启 Redis 
+2. 配置 Nacos
 
-3. 依次运行
+3. 配置 Redis 
+
+4. 依次运行
 
    + npm run dev
 
@@ -19,5 +21,7 @@
    + AdminApplication
 
    + ProductApplication
+
+   + ThirdPartyApplication
 
      

@@ -77,7 +77,7 @@
     </el-upload>
     <div v-if="uploadedImageUrl" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
       <span style="color: #67c23a; font-weight: 500;">已上传：</span>
-      <el-image :src="uploadedImageUrl" style="width: 80px; height: 80px;" fit="cover"/>
+      <el-image :src="signedImageUrl" style="width: 80px; height: 80px;" fit="cover"/>
       <el-button size="small" type="text" @click="copyUrl">复制路径</el-button>
       <el-button size="small" type="danger" @click="clearUploaded">清除</el-button>
     </div>
@@ -86,7 +86,7 @@
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPut} from "../../http/HttpRequest.js";
+import {doGet, doPost, doPut} from "../../http/HttpRequest.js";
 import {getUUID, messageAlert, messageTip} from "../../util/util.js";
 
 export default defineComponent({
@@ -105,15 +105,16 @@ export default defineComponent({
       }],
       myPageSize: 0,
       myTotal: 0,
-      // 修改3：新增变量，保存上传成功的完整 URL
-      uploadedImageUrl: '',  // 例如: https://xxx.com/test06/abc123.jpg
+      // 保存上传成功的 URL，例如: test06/abc123.jpg
+      uploadedImageUrl: '',
+      // 进过签名验证的完整 URL，该路径可直接预览
+      signedImageUrl: '',
+
     }
   },
 
   methods: {
     messageTip,
-    // 自定义上传：核心！直传 OSS
-    // 自定义上传：核心！直传 OSS
     customUpload(params) {
       const file = params.file;
 
@@ -126,54 +127,52 @@ export default defineComponent({
         messageTip('文件不能超过 10MB!', 'error');
         return Promise.reject();
       }
+      doGet("/api/thirdParty/oss/getPolicy", {
+        dir: "test7/"
+      }).then(resp => {
+        if (resp.data.code === 200) {
+          const data = resp.data.data;
+          const uploadUrl = `//${data.host.split('://')[1]}`;
 
-      return doGet('/api/thirdParty/oss/getPolicy', {})
-          .then(resp => {
-            const data = resp.data.data;
-            const uploadUrl = `//${data.host.split('://')[1]}`;
+          // 生成唯一文件名
+          const uuid = getUUID();
+          const fileExt = file.name.split('.').pop();
+          const ossFileName = `${uuid}.${fileExt}`;  // 例如: abc123.jpg
 
-            // 生成唯一文件名
-            const uuid = getUUID();
-            const fileExt = file.name.split('.').pop();
-            const ossFileName = `${uuid}.${fileExt}`;  // 例如: abc123.jpg
+          const formData = new FormData();
+          formData.append('key', data.dir + ossFileName);
+          formData.append('OSSAccessKeyId', data.accessKeyId);
+          formData.append('policy', data.policy);
+          formData.append('signature', data.signature);
+          formData.append('success_action_status', '200');
+          formData.append('file', file);
 
-            const formData = new FormData();
-            formData.append('key', data.dir + ossFileName);
-            formData.append('OSSAccessKeyId', data.accessKeyId);
-            formData.append('policy', data.policy);
-            formData.append('signature', data.signature);
-            formData.append('success_action_status', '200');
-            formData.append('file', file);
-
-            // 修改5：把 ossFileName 传到下一个 then
-            return fetch(uploadUrl, {method: 'POST', body: formData}).then(response => ({
-              response,
-              data,
-              ossFileName  // 关键！传下去
-            }));
-          })
-          .then(({response, data, ossFileName}) => {
-            if (response.ok) {
-              // 修改6：拼接完整 URL 并保存到变量
+          doPost(uploadUrl, formData).then((response) => {
+            // console.log("ali 返回内容：")
+            // console.log(response);
+            if (response.status === 200) {
+              // 拼接完整 URL
               const finalUrl = `${data.baseUrl}/${data.dir}${ossFileName}`;
-              this.uploadedImageUrl = finalUrl;  // 保存！
-
-              messageTip('上传成功！', 'success');
+              // 并保存到变量
+              this.uploadedImageUrl = data.dir + ossFileName;
               params.onSuccess({url: finalUrl}, params.file);
+
+              this.getSignedImageUrl(data.dir + ossFileName);
+
+              messageTip("上传成功！", "success");
             } else {
-              return response.text().then(text => {
-                throw new Error(text);
-              });
+              messageTip("上传失败！", "error");
             }
           })
-          .catch(err => {
-            messageTip('上传失败: ' + err.message, 'error');
-            params.onError(err, params.file);
-          });
+        } else {
+          messageTip("用户验证失败！", "error");
+        }
+      })
     },
+
     // 修改7：新增方法：复制路径
     copyUrl() {
-      navigator.clipboard.writeText(this.uploadedImageUrl).then(() => {
+      navigator.clipboard.writeText(this.signedImageUrl).then(() => {
         messageTip('路径已复制到剪贴板', 'success');
       });
     },
@@ -181,11 +180,21 @@ export default defineComponent({
     // 修改8：新增方法：清除已上传
     clearUploaded() {
       this.uploadedImageUrl = '';
+      this.signedImageUrl = '';
       messageTip('已清除', 'info');
     },
 
     // ... 你的其他 methods ...
-
+    // 工具函数：获取签名 URL
+    getSignedImageUrl(url) {
+      doGet('/api/thirdParty/oss/getSignedUrl', {
+        uploadedImageUrl: url
+      }).then(resp => {
+        if (resp.data.code === 200) {
+          this.signedImageUrl = resp.data.data;
+        }
+      })
+    },
 
     handleShowStatusChange(brandId, flag) {
       let formData = new FormData();
