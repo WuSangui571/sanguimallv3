@@ -86,8 +86,8 @@
       </el-form-item>
 
       <el-form-item label="logo" prop="logoVo.savedLogo">
-<!--        <el-input v-model="addBrand.logoVo.signedLogo"/>-->
-<!--        <el-input v-model="addBrand.logoVo.savedLogo"/>-->
+        <el-input v-model="addBrand.logoVo.signedLogo"/>
+        <el-input v-model="addBrand.logoVo.savedLogo"/>
         <el-upload
             ref="logoUpload"
             class="upload-demo"
@@ -182,7 +182,7 @@ export default defineComponent({
         },
         showStatus: 1,
         firstLetter: "",
-        sort: 1,
+        sort: 0,
         descript: "",
       },
       addBrandRules: {
@@ -204,7 +204,7 @@ export default defineComponent({
         ],
         sort: [
           {required: true, message: '请输入排序！', trigger: 'blur'},
-          {pattern: /^[1-9]\d{0,2}$/, message: '排序必须是大于0，小于1000的整数！', trigger: 'blur'}
+          {pattern: /^(?:0|[1-9][0-9]{0,2}|1000)$/, message: '排序必须是不小于0，不大于 1000的整数！', trigger: 'blur'},
         ],
         descript: [
           {required: true, message: '请输入品牌介绍！', trigger: 'blur'},

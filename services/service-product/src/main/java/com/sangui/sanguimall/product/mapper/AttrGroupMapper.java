@@ -2,6 +2,11 @@ package com.sangui.sanguimall.product.mapper;
 
 import com.sangui.sanguimall.product.model.entity.AttrGroupDo;
 
+import java.util.List;
+
+/**
+ * @author sangui
+ */
 public interface AttrGroupMapper {
     int deleteByPrimaryKey(Long attrGroupId);
 
@@ -14,4 +19,8 @@ public interface AttrGroupMapper {
     int updateByPrimaryKeySelective(AttrGroupDo record);
 
     int updateByPrimaryKey(AttrGroupDo record);
+
+    List<AttrGroupDo> selectAttrGroupsByPage(Long catelogId);
+
+    int deleteByIds(String ids);
 }

@@ -1,0 +1,25 @@
+package com.sangui.sanguimall.product.model.converter;
+
+
+import com.sangui.sanguimall.product.model.entity.AttrGroupDo;
+import com.sangui.sanguimall.product.model.entity.CategoryDo;
+import com.sangui.sanguimall.product.model.vo.AttrGroupVo;
+import com.sangui.sanguimall.product.model.vo.CategoryVo;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+/**
+ * @Author: sangui
+ * @CreateTime: 2025-11-10
+ * @Description:
+ * @Version: 1.0
+ */
+@Mapper(componentModel = "spring")
+public interface AttrGroupConverter {
+    /**
+     * DO → VO
+     */
+    @Mapping(target = "id",source = "attrGroupId")
+    AttrGroupVo doToVo(AttrGroupDo attrGroupDo);
+
+}

@@ -3,6 +3,7 @@ package com.sangui.sanguimall.product.model.converter;
 
 import com.sangui.sanguimall.product.model.entity.CategoryDo;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
+import com.sangui.sanguimall.product.model.vo.OneTwoThreeCategoryVo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -23,4 +24,7 @@ public interface CategoryConverter {
     @Mapping(source = "name", target = "label")
     @Mapping(source = "catLevel", target = "level")
     CategoryVo doToVo(CategoryDo categoryDo);
+
+    @Mapping(target = "id",source = "catId")
+    OneTwoThreeCategoryVo doToVo2(CategoryDo categoryDo);
 }

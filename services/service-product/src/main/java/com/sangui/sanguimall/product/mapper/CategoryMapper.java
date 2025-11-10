@@ -23,4 +23,10 @@ public interface CategoryMapper {
     List<CategoryDo> selectAll();
 
     List<CategoryDo> selectBySameParent(Long parentCid);
+
+    List<CategoryDo> selectOne();
+
+    List<CategoryDo> selectTwo(Long oneOptionsId);
+
+    List<CategoryDo> selectThree(Long twoOptionsId);
 }

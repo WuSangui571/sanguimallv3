@@ -23,8 +23,28 @@
         from pms_category
         ORDER BY cat_level ASC, sort ASC;
     </select>
+    <select id="selectThree"  resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pms_category
+        where parent_cid = #{parentCid,jdbcType=BIGINT}
+        order by sort
+    </select>
 
-
+    <select id="selectTwo"  resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pms_category
+        where parent_cid = #{parentCid,jdbcType=BIGINT}
+        order by sort
+    </select>
+    <select id="selectOne"  resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pms_category
+        where parent_cid = 0
+        order by sort
+    </select>
     <select id="selectBySameParent" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

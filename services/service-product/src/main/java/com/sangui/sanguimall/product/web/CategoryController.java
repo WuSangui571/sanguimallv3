@@ -4,6 +4,7 @@ package com.sangui.sanguimall.product.web;
 import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategorySequenceQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
+import com.sangui.sanguimall.product.model.vo.OneTwoThreeCategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
@@ -59,5 +60,37 @@ public class CategoryController {
         int count = categoryService.editCategorySequence(categorySequenceQuery);
         return count >= 1 ? R.ok() : R.fail();
     }
+
+    /**
+     * 获取一级分类的的数据
+     * @return 一级分类的的数据
+     */
+    @GetMapping("/one")
+    public R getOne(){
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = categoryService.getOne();
+        return R.ok(oneTwoThreeCategoryVoList);
+    }
+
+    /**
+     * 获取二级分类的的数据
+     * @return 二级分类的的数据
+     */
+    @GetMapping("/two")
+    public R getTwo(@RequestParam(value = "oneOptionsId")Long oneOptionsId){
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = categoryService.getTwo(oneOptionsId);
+        return R.ok(oneTwoThreeCategoryVoList);
+    }
+
+    /**
+     * 获取三级分类的的数据
+     * @return 三级分类的的数据
+     */
+    @GetMapping("/three")
+    public R getThree(@RequestParam(value = "twoOptionsId")Long twoOptionsId){
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = categoryService.getThree(twoOptionsId);
+        return R.ok(oneTwoThreeCategoryVoList);
+    }
+
+
 
 }

@@ -7,6 +7,7 @@ import com.sangui.sanguimall.product.model.entity.CategoryDo;
 import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategorySequenceQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
+import com.sangui.sanguimall.product.model.vo.OneTwoThreeCategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * @Author: sangui
  * @CreateTime: 2025-10-29
- * @Description: CategoryServiceImpl
+ * @Description: CategoryServiceImpl(修改 category 的信息记得修改 attrGroup 表)
  * @Version: 1.0
  */
 @Service
@@ -128,5 +129,35 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryNeedSequenceDo.setSort(sequenceNeedAfterMeDo.getSort() + 1);
         return categoryMapper.updateByPrimaryKeySelective(categoryNeedSequenceDo);
+    }
+
+    @Override
+    public List<OneTwoThreeCategoryVo> getOne() {
+        List<CategoryDo> categoryDoList = categoryMapper.selectOne();
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = new ArrayList<>();
+        for (CategoryDo categoryDo: categoryDoList){
+            oneTwoThreeCategoryVoList.add(categoryConverter.doToVo2(categoryDo));
+        }
+        return oneTwoThreeCategoryVoList;
+    }
+
+    @Override
+    public List<OneTwoThreeCategoryVo> getTwo(Long oneOptionsId) {
+        List<CategoryDo> categoryDoList = categoryMapper.selectTwo(oneOptionsId);
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = new ArrayList<>();
+        for (CategoryDo categoryDo: categoryDoList){
+            oneTwoThreeCategoryVoList.add(categoryConverter.doToVo2(categoryDo));
+        }
+        return oneTwoThreeCategoryVoList;
+    }
+
+    @Override
+    public List<OneTwoThreeCategoryVo> getThree(Long twoOptionsId) {
+        List<CategoryDo> categoryDoList = categoryMapper.selectThree(twoOptionsId);
+        List<OneTwoThreeCategoryVo> oneTwoThreeCategoryVoList = new ArrayList<>();
+        for (CategoryDo categoryDo: categoryDoList){
+            oneTwoThreeCategoryVoList.add(categoryConverter.doToVo2(categoryDo));
+        }
+        return oneTwoThreeCategoryVoList;
     }
 }

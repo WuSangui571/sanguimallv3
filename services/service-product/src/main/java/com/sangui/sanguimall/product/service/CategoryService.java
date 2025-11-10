@@ -5,6 +5,7 @@ import com.sangui.sanguimall.product.model.entity.CategoryDo;
 import com.sangui.sanguimall.product.model.query.CategoryQuery;
 import com.sangui.sanguimall.product.model.vo.CategorySequenceQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
+import com.sangui.sanguimall.product.model.vo.OneTwoThreeCategoryVo;
 
 import java.util.List;
 
@@ -24,4 +25,10 @@ public interface CategoryService {
     int editCategory(CategoryQuery categoryQuery);
 
     int editCategorySequence(CategorySequenceQuery categorySequenceQuery);
+
+    List<OneTwoThreeCategoryVo> getOne();
+
+    List<OneTwoThreeCategoryVo> getTwo(Long oneOptionsId);
+
+    List<OneTwoThreeCategoryVo> getThree(Long twoOptionsId);
 }

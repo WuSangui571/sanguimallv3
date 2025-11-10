@@ -48,7 +48,7 @@
               </el-icon>
               平台属性
             </template>
-            <el-menu-item index="3-3-1">
+            <el-menu-item index="/dashboard/product/attr/group">
               属性分组
             </el-menu-item>
             <el-menu-item index="3-3-2">
