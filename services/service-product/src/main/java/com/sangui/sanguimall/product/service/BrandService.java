@@ -3,7 +3,9 @@ package com.sangui.sanguimall.product.service;
 
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.product.model.entity.BrandDo;
+import com.sangui.sanguimall.product.model.query.AddBrandQuery;
 import com.sangui.sanguimall.product.model.query.BrandEditShowStatusQuery;
+import com.sangui.sanguimall.product.model.vo.SingleBrandVo;
 
 /**
  * @Author: sangui
@@ -15,4 +17,15 @@ public interface BrandService {
     PageInfo<BrandDo> getBrandsByPage(Integer current);
 
     int editBrandShowStatus(BrandEditShowStatusQuery brandEditShowStatusQuery);
+
+    int addBrand(AddBrandQuery addBrandQuery);
+
+    SingleBrandVo getSingeBrandById(Long id);
+
+
+    int editBrand(AddBrandQuery addBrandQuery);
+
+    int delBrandById(Long id);
+
+    int delBrandByIds(String ids);
 }

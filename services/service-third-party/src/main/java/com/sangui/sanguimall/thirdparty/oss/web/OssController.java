@@ -8,10 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sangui.sanguimall.result.R;
 import com.sangui.sanguimall.thirdparty.oss.service.OssService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.security.InvalidKeyException;
@@ -45,5 +42,17 @@ public class OssController {
     public R getSignedUrl(@RequestParam(value = "uploadedImageUrl") String uploadedImageUrl) {
         String url = ossService.getSignedUrl(uploadedImageUrl);
         return R.ok(url);
+    }
+
+    @DeleteMapping("/delete")
+    public R deleteFile(@RequestParam(value = "objectName") String objectName) {
+        String message = ossService.deleteFile(objectName);
+        return R.ok(message);
+    }
+
+    @DeleteMapping("/batchDelete")
+    public R deleteFiles(@RequestBody List<String> objectNames) {
+        String message = ossService.deleteFiles(objectNames);
+        return R.ok(message);
     }
 }

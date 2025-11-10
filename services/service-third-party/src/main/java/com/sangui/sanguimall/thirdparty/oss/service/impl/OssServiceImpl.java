@@ -3,6 +3,7 @@ package com.sangui.sanguimall.thirdparty.oss.service.impl;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.model.DeleteObjectsRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sangui.sanguimall.thirdparty.oss.service.OssService;
@@ -76,5 +77,34 @@ public class OssServiceImpl implements OssService {
         ossClient.shutdown();
         System.out.println("后端返回的最终 url = " + url.toString());
         return url.toString();
+    }
+
+    @Override
+    public String deleteFile(String objectName) {
+        OSS ossClient = new OSSClientBuilder().build(ENDPOINT, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        try {
+            ossClient.deleteObject(BUCKET, objectName);
+            return "删除成功";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "删除失败";
+        } finally {
+            ossClient.shutdown();
+        }
+    }
+
+    @Override
+    public String deleteFiles(List<String> objectNames) {
+        OSS ossClient = new OSSClientBuilder().build(ENDPOINT, ACCESS_KEY_ID, ACCESS_KEY_SECRET);
+        try {
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(BUCKET).withKeys(objectNames);
+            ossClient.deleteObjects(deleteObjectsRequest);
+            return "批量删除成功";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "批量删除失败，" + e.getMessage();
+        } finally {
+            ossClient.shutdown();
+        }
     }
 }

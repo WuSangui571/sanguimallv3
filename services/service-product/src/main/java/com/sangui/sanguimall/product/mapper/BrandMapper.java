@@ -20,4 +20,8 @@ public interface BrandMapper {
 
 
     List<BrandDo> selectBrandByPage();
+
+    int deleteByIds(String ids);
+
+    List<BrandDo> selectBrandByIds(String ids);
 }

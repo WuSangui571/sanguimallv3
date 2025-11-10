@@ -1,7 +1,7 @@
 <template>
   <!--两个按钮-->
   <el-button type="primary" @click="add">添加品牌</el-button>
-  <el-button type="danger">批量删除</el-button>
+  <el-button type="danger" @click="batchDel">批量删除</el-button>
   <!--表格开始-->
   <el-table
       :data="brandList"
@@ -14,9 +14,8 @@
     <el-table-column label="LOGO" width="240">
       <template #default="scope">
         <el-image
-
             :src="scope.row.logo"
-            fit="none"
+            fit="fill"
         />
       </template>
     </el-table-column>
@@ -45,8 +44,10 @@
     </el-table-column>
 
     <el-table-column label="操作">
-      <el-button type="warning">编辑</el-button>
-      <el-button type="danger">删除</el-button>
+      <template #default="scope">
+        <el-button type="warning" @click="edit(scope.row.brandId)">编辑</el-button>
+        <el-button type="danger" @click="del(scope.row.brandId,scope.row.name)">删除</el-button>
+      </template>
     </el-table-column>
   </el-table>
   <!--表格结束-->
@@ -78,14 +79,15 @@
 
   <!--  </div>-->
   <!--这是新增品牌的弹窗-->
-  <el-dialog v-model="addBrandWindows" title="添加品牌" width="600" draggable>
+  <el-dialog v-model="addBrandWindows" :title="addBrand.id>0?'编辑品牌':'添加品牌'" width="600" draggable>
     <el-form :model="addBrand" label-width="110px" :rules="addBrandRules" ref="addBrandRefForm">
       <el-form-item label="品牌名" prop="name">
         <el-input v-model="addBrand.name"/>
       </el-form-item>
 
       <el-form-item label="logo" prop="logoVo.savedLogo">
-        <!--        <el-input v-model="addBrand.logoVo.signedLogo" />-->
+<!--        <el-input v-model="addBrand.logoVo.signedLogo"/>-->
+<!--        <el-input v-model="addBrand.logoVo.savedLogo"/>-->
         <el-upload
             ref="logoUpload"
             class="upload-demo"
@@ -94,7 +96,7 @@
             :show-file-list="false"
             :limit="1"
             :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"
-            v-if="!uploadedImageUrl"
+            v-if="(!uploadedImageUrl && addBrand.id===0)||id_exist_after_clear"
         >
           <el-button type="primary">点击上传图片</el-button>
           <template #tip>
@@ -104,10 +106,9 @@
           </template>
         </el-upload>
         <!--上传完成之后的预览 div-->
-        <div v-if="uploadedImageUrl" style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
-          <!--          <span style="color: #67c23a; font-weight: 500;">已上传：</span>-->
+        <div v-if="(uploadedImageUrl || addBrand.id>0) && !id_exist_after_clear"
+             style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
           <el-image :src="signedImageUrl" style="width: 200px;" fit="fill"/>
-          <!--          <el-button size="small" type="text" @click="copyUrl">复制路径</el-button>-->
           <el-button size="small" type="danger" @click="clearUploaded">清除</el-button>
         </div>
       </el-form-item>
@@ -139,7 +140,7 @@
       <div class="dialog-footer">
         <el-button @click="addBrandWindows = false">取消</el-button>
         <el-button type="primary" @click="addBrandSubmit">
-          添加
+          {{ addBrand.id > 0 ? '编 辑' : '添 加' }}
         </el-button>
       </div>
     </template>
@@ -148,8 +149,8 @@
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPost, doPut} from "../../http/HttpRequest.js";
-import {getUUID, messageAlert, messageTip} from "../../util/util.js";
+import {doDelete, doGet, doPost, doPut} from "../../http/HttpRequest.js";
+import {getUUID, messageAlert, messageConfirm, messageTip} from "../../util/util.js";
 
 export default defineComponent({
   name: "BrandView",
@@ -157,7 +158,7 @@ export default defineComponent({
     return {
       // 定义 List 对象
       brandList: [{
-        brandId: "",
+        brandId: 0,
         name: "",
         logo: "",
         descript: "",
@@ -181,7 +182,7 @@ export default defineComponent({
         },
         showStatus: 1,
         firstLetter: "",
-        sort: 0,
+        sort: 1,
         descript: "",
       },
       addBrandRules: {
@@ -210,17 +211,134 @@ export default defineComponent({
           {max: 500, message: '品牌介绍在 500字符 之内！', trigger: 'blur'},
         ],
       },
+      id_exist_after_clear: false,
+      selectedIds: [],
+      selectedNames: [],
     }
   },
 
   methods: {
+    // 批量删除品牌
+    batchDel() {
+      if (this.selectedNames.length == 0) {
+        messageTip("请勾选批量删除的品牌！", "error")
+        return;
+      }
+      messageConfirm("确认批量删除删除 " + this.selectedNames + " 吗？", "温馨提示").then(() => {
+        // 将数组变成字符串，用逗号相隔
+        let ids = this.selectedIds.join(",");
+        // alert(ids)
+        doDelete("/api/product/brand/brands", {ids: ids}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已批量删除" + this.selectedNames, "success")
+            this.reload();
+          } else {
+            messageTip("批量删除失败！原因：" + resp.data.msg, "error")
+          }
+        })
+      }).catch(() => {
+        // 用户点击取消就会触发 catch 里
+        messageTip("已取消批量删除！", "warning")
+      })
+    },
+    // 删除指定品牌
+    del(id, name) {
+      messageConfirm("确认删除 " + name + " 吗？", "温馨提示").then(() => {
+        let url = "/api/product/brand/brand/" + id
+        //alert(url)
+        doDelete(url, {}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已删除" + name, "success")
+            this.reload();
+          } else {
+            messageTip("删除失败！", "error")
+          }
+        })
+      }).catch(() => {
+        // 用户点击取消就会触发 catch 里
+        messageTip("已取消删除！", "error")
+      })
+    },
+    // 编辑指定 id 的品牌
+    edit(id) {
+      this.addBrandWindows = true;
+      this.loadEditData(id);
+    },
+    // 编辑时加载对应 id 品牌的数据
+    loadEditData(id) {
+      let url = "/api/product/brand/brand/" + id
+      doGet(url, {}).then((resp) => {
+        if (resp.data.code === 200) {
+          // console.log(resp.data.data);
+          // 简单一点，也可以这样：
+          this.addBrand.id = resp.data.data.id;
+          this.addBrand.name = resp.data.data.name;
+          this.addBrand.logoVo.savedLogo = resp.data.data.logo;
+          this.uploadedImageUrl = resp.data.data.logo;
+          this.getSignedImageUrl(this.uploadedImageUrl)
+          // this.addBrand. = resp.data.data.logo;
+          this.addBrand.showStatus = resp.data.data.showStatus;
+          this.addBrand.firstLetter = resp.data.data.firstLetter;
+          this.addBrand.sort = resp.data.data.sort;
+          this.addBrand.descript = resp.data.data.descript;
+        }
+      })
+    },
     // 提交新增品牌
     addBrandSubmit() {
-      this.addBrandWindows = false
-      // ...
+      this.$refs.addBrandRefForm.validate((isValid) => {
+        if (isValid) {
+          // console.log("passed");
+          let formData = new FormData();
+          // 以键值对的形式写入数据
+          formData.append('name', this.addBrand.name);
+          formData.append('logo', this.addBrand.logoVo.savedLogo);
+          formData.append('showStatus', this.addBrand.showStatus);
+          formData.append('firstLetter', this.addBrand.firstLetter);
+          formData.append('sort', this.addBrand.sort);
+          formData.append('descript', this.addBrand.descript);
+          // console.log(formData);
+          if (this.addBrand.id > 0) {
+            formData.append('id', this.addBrand.id);
+            doPut("/api/product/brand/brand", formData).then((resp) => {
+              // console.log(resp.data.data);
+              if (resp.data.code === 200) {
+                messageTip("编辑品牌成功！", "success");
+                this.addBrandWindows = false;
+                this.reload();
+              } else {
+                messageTip("编辑品牌失败！请检查输入的条件！", "error");
+              }
+            })
+          }else {
+            doPost("/api/product/brand/brand", formData).then((resp) => {
+              if (resp.data.code === 200) {
+                messageTip("添加品牌成功！", "success");
+                this.addUserWindows = false;
+                this.reload();
+              } else {
+                messageTip("添加品牌失败！", "error");
+              }
+            })
+          }
+        }
+      })
     },
     // 新增品牌
     add() {
+      this.addBrand = {
+        id: 0,
+        name: "",
+        logoVo: {
+          savedLogo: "",
+          signedLogo: ""
+        },
+        showStatus: 1,
+        firstLetter: "",
+        sort: 1,
+        descript: "",
+      };
+      this.clearUploaded();
       this.addBrandWindows = true
     },
     messageTip,
@@ -237,8 +355,8 @@ export default defineComponent({
         return Promise.reject();
       }
       doGet("/api/thirdParty/oss/getPolicy", {
-        //dir: "product/brand/logo/"
-        dir: "test/"
+         dir: "product/brand/logo/"
+        //dir: "test/"
       }).then(resp => {
         if (resp.data.code === 200) {
           const data = resp.data.data;
@@ -265,10 +383,12 @@ export default defineComponent({
               const finalUrl = `${data.baseUrl}/${data.dir}${ossFileName}`;
               // 并保存到变量
               this.uploadedImageUrl = data.dir + ossFileName;
+              this.addBrand.logoVo.savedLogo = this.uploadedImageUrl;
+
               params.onSuccess({url: this.uploadedImageUrl}, params.file);
 
               this.getSignedImageUrl(data.dir + ossFileName);
-
+              this.id_exist_after_clear = false;
               messageTip("上传成功！", "success");
             } else {
               messageTip("上传失败！", "error");
@@ -289,6 +409,8 @@ export default defineComponent({
 
     // 修改8：新增方法：清除已上传
     clearUploaded() {
+      this.id_exist_after_clear = this.addBrand.id > 0;
+
       // 如果 ref 存在，就清空 el-upload 内部 fileList
       const uploadComp = this.$refs.logoUpload;
       if (uploadComp && typeof uploadComp.clearFiles === 'function') {
@@ -302,7 +424,7 @@ export default defineComponent({
         this.addBrand.logoVo.savedLogo = '';
         this.addBrand.logoVo.signedLogo = '';
       }
-      messageTip('已清除', 'info');
+      //messageTip('已清除', 'info');
     },
 
     // ... 你的其他 methods ...
@@ -313,6 +435,7 @@ export default defineComponent({
       }).then(resp => {
         if (resp.data.code === 200) {
           this.signedImageUrl = resp.data.data;
+          this.addBrand.logoVo.signedLogo = resp.data.data;
         }
       })
     },
@@ -352,8 +475,18 @@ export default defineComponent({
       this.getData(current)
     },
     // 勾选或者取消勾选时触发该函数
-    handleSelectionChange() {
-      // 完成批量删除模块功能时再写这个方法
+    handleSelectionChange(selectionDataArray) {
+      // console.log(selectionDataArray)
+      // 清空 Ids、Names 数组
+      this.selectedIds = [];
+      this.selectedNames = [];
+      // 遍历数组
+      selectionDataArray.forEach(data => {
+        // 遍历数组中的元素，将 id、names 加入统一的数组
+        this.selectedIds.push(data.brandId);
+        this.selectedNames.push(data.name);
+      })
+      // console.log(selectionDataArray)
     },
     // 查询品牌列表数据
     getData(current) {

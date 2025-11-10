@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,4 +18,8 @@ public interface OssService {
     Map<String, String> getPolicy(String dir) throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeyException;
 
     String getSignedUrl(String uploadedImageUrl);
+
+    String deleteFile(String objectName);
+
+    String deleteFiles(List<String> objectNames);
 }
