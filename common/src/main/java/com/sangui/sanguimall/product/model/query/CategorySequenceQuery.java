@@ -1,4 +1,4 @@
-package com.sangui.sanguimall.product.model.vo;
+package com.sangui.sanguimall.product.model.query;
 
 
 import lombok.Data;

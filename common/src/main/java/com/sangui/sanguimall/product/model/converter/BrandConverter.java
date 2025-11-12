@@ -2,8 +2,6 @@ package com.sangui.sanguimall.product.model.converter;
 
 
 import com.sangui.sanguimall.product.model.entity.BrandDo;
-import com.sangui.sanguimall.product.model.entity.CategoryDo;
-import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import com.sangui.sanguimall.product.model.vo.SingleBrandVo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

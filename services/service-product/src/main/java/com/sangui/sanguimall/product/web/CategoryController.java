@@ -2,7 +2,7 @@ package com.sangui.sanguimall.product.web;
 
 
 import com.sangui.sanguimall.product.model.query.CategoryQuery;
-import com.sangui.sanguimall.product.model.vo.CategorySequenceQuery;
+import com.sangui.sanguimall.product.model.query.CategorySequenceQuery;
 import com.sangui.sanguimall.product.model.vo.CategoryVo;
 import com.sangui.sanguimall.product.model.vo.OneTwoThreeCategoryVo;
 import com.sangui.sanguimall.product.service.CategoryService;

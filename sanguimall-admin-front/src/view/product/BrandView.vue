@@ -69,6 +69,7 @@
 
     <el-table-column label="操作">
       <template #default="scope">
+        <el-button type="success" @click="relation(scope.row.brandId,scope.row.name)">关联分类</el-button>
         <el-button type="warning" @click="edit(scope.row.brandId)">编辑</el-button>
         <el-button type="danger" @click="del(scope.row.brandId,scope.row.name)">删除</el-button>
       </template>
@@ -93,8 +94,9 @@
       </el-form-item>
 
       <el-form-item label="logo" prop="logoVo.savedLogo">
-        <el-input v-model="addBrand.logoVo.signedLogo"/>
-        <el-input v-model="addBrand.logoVo.savedLogo"/>
+        <!--用于查看变量的 input-->
+        <!--        <el-input v-model="addBrand.logoVo.signedLogo"/>-->
+        <!--        <el-input v-model="addBrand.logoVo.savedLogo"/>-->
         <el-upload
             ref="logoUpload"
             class="upload-demo"
@@ -151,6 +153,37 @@
         </el-button>
       </div>
     </template>
+  </el-dialog>
+  <!--关联分类的窗口  -->
+  <el-dialog v-model="relationWindows" :title="relationBrandNameTitle"
+             width="400" draggable>
+    <el-table
+        :data="relationList"
+        style="width: 100%">
+      <el-table-column type="default" width="60"/>
+      <!--若 type 为 id，则该字段会自动增长-->
+      <el-table-column type="index" label="序号" width="60"/>
+      <el-table-column property="catelogName" label="分类名" width="120"/>
+      <el-table-column label="操作">
+        <el-button type="danger">移除</el-button>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size=relationMyPageSize
+        :total=relationMyTotal
+        @prev-click="toRelationPage"
+        @current-change="toRelationPage"
+        @next-click="toRelationPage"/>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="success" @click="addRelation()" >添加关联</el-button>
+        <el-button @click="closeRelation">取消</el-button>
+      </div>
+    </template>
+
   </el-dialog>
 </template>
 
@@ -232,14 +265,29 @@ export default defineComponent({
       },
       searchBrandRules: {
         selectValue: [
-          { min: 1, max: 50, message: '关键字长度应在 1 到 50 个字符之间！', trigger: 'blur' },
-          { pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/, message: '只允许输入中文、英文、数字、下划线或空格！', trigger: 'blur' }
+          {min: 1, max: 50, message: '关键字长度应在 1 到 50 个字符之间！', trigger: 'blur'},
+          {
+            pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/,
+            message: '只允许输入中文、英文、数字、下划线或空格！',
+            trigger: 'blur'
+          }
         ]
       },
       isSearch: false,
       // 是否处于中文输入法合成中
       isComposing: false,
+      // 关联分类的窗口
+      relationWindows: false,
+      relationList: [{
+        id: 0,
+        catelogName: "",
+      }],
+      relationBrandNameTitle:"",
+      relationBrandId:0,
+      relationMyPageSize: 0,
+      relationMyTotal: 0,
     }
+
   },
 
   methods: {
@@ -574,6 +622,32 @@ export default defineComponent({
       if (this.isComposing) return; // 中文输入法合成阶段的回车不触发搜索
       this.submitSearch();          // 等价于点击搜索按钮
     },
+    relation(id,name) {
+      this.relationBrandNameTitle = "关联分类-" + name;
+      this.relationBrandId = id;
+      this.relationWindows = true;
+      this.getRelationData(1, id);
+    },
+    getRelationData(current, id) {
+      doGet("/api/product/categoryBrandRelation/relations", {
+        // 当前页
+        current: current,
+        id: id
+      }).then(resp => {
+        if (resp.data.code === 200) {
+          // console.log(resp)
+          this.relationList = resp.data.data.list;
+          this.relationMyTotal = resp.data.data.total;
+          this.relationMyPageSize = resp.data.data.pageSize;
+        }
+      })
+    },
+    closeRelation() {
+      this.relationWindows = false;
+    },
+    toRelationPage(current){
+      this.getRelationData(current,this.relationBrandId)
+    },
   },
   mounted() {
     this.getData(1);
@@ -600,4 +674,5 @@ export default defineComponent({
   margin-left: 10px;
   margin-top: 20px;
 }
+
 </style>
