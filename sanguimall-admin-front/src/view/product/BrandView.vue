@@ -1,7 +1,31 @@
 <template>
-  <!--两个按钮-->
-  <el-button type="primary" @click="add">添加品牌</el-button>
-  <el-button type="danger" @click="batchDel">批量删除</el-button>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <!--两个按钮-->
+    <el-button type="primary" @click="add">添加品牌</el-button>
+    <el-button type="danger" @click="batchDel">批量删除</el-button>
+    <div class="mySearch">
+      <el-form :model="searchBrand" :rules="searchBrandRules" ref="searchBrandRefForm">
+        <!--      <el-form :model="searchUser">-->
+        <el-form-item prop="selectValue">
+          <el-input
+              v-model="searchBrand.selectValue"
+              style="max-width: 600px"
+              placeholder="请输入具体的模糊查询"
+              class="input-with-select"
+              @keydown.enter.prevent
+              @keyup.enter="onKeyupEnter"
+              @compositionstart="onCompStart"
+              @compositionend="onCompEnd"
+          >
+            <template #append>
+              <el-button :icon="Search" @click="submitSearch"/>
+            </template>
+          </el-input>
+        </el-form-item>
+      </el-form>
+    </div>
+    <el-button type="success" @click="reFlash">重置</el-button>
+  </div>
   <!--表格开始-->
   <el-table
       :data="brandList"
@@ -59,23 +83,6 @@
       @prev-click="toPage"
       @current-change="toPage"
       @next-click="toPage"/>
-  <!--测试的上传按钮-->
-  <!--  <div>-->
-  <!--    <el-upload-->
-  <!--        class="upload-demo"-->
-  <!--        :http-request="customUpload"-->
-  <!--        action="#"-->
-  <!--        :show-file-list="false"-->
-  <!--        :limit="1"-->
-  <!--        :on-exceed="() => messageTip('一次只能上传一个文件', 'warning')"-->
-  <!--    >-->
-  <!--      <el-button type="primary">点击上传图片</el-button>-->
-  <!--      <template #tip>-->
-  <!--        <div class="el-upload__tip">-->
-  <!--          仅至此 jpg/png 格式，且文件大小小于 10MB-->
-  <!--        </div>-->
-  <!--      </template>-->
-  <!--    </el-upload>-->
 
   <!--  </div>-->
   <!--这是新增品牌的弹窗-->
@@ -151,9 +158,15 @@
 import {defineComponent} from "vue";
 import {doDelete, doGet, doPost, doPut} from "../../http/HttpRequest.js";
 import {getUUID, messageAlert, messageConfirm, messageTip} from "../../util/util.js";
+import {Search} from "@element-plus/icons-vue";
 
 export default defineComponent({
   name: "BrandView",
+  computed: {
+    Search() {
+      return Search
+    }
+  },
   data() {
     return {
       // 定义 List 对象
@@ -214,6 +227,18 @@ export default defineComponent({
       id_exist_after_clear: false,
       selectedIds: [],
       selectedNames: [],
+      searchBrand: {
+        selectValue: "",
+      },
+      searchBrandRules: {
+        selectValue: [
+          { min: 1, max: 50, message: '关键字长度应在 1 到 50 个字符之间！', trigger: 'blur' },
+          { pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/, message: '只允许输入中文、英文、数字、下划线或空格！', trigger: 'blur' }
+        ]
+      },
+      isSearch: false,
+      // 是否处于中文输入法合成中
+      isComposing: false,
     }
   },
 
@@ -310,7 +335,7 @@ export default defineComponent({
                 messageTip("编辑品牌失败！请检查输入的条件！", "error");
               }
             })
-          }else {
+          } else {
             doPost("/api/product/brand/brand", formData).then((resp) => {
               if (resp.data.code === 200) {
                 messageTip("添加品牌成功！", "success");
@@ -355,7 +380,7 @@ export default defineComponent({
         return Promise.reject();
       }
       doGet("/api/thirdParty/oss/getPolicy", {
-         dir: "product/brand/logo/"
+        dir: "product/brand/logo/"
         //dir: "test/"
       }).then(resp => {
         if (resp.data.code === 200) {
@@ -490,17 +515,64 @@ export default defineComponent({
     },
     // 查询品牌列表数据
     getData(current) {
-      doGet("/api/product/brand/brand", {
-        // 当前页
-        current: current
-      }).then(resp => {
-        if (resp.data.code === 200) {
-          console.log(resp)
-          this.brandList = resp.data.data.list;
-          this.myTotal = resp.data.data.total;
-          this.myPageSize = resp.data.data.pageSize;
+      if (this.isSearch) {
+        // console.log(formData);
+        doGet("/api/product/brand/searchBrand", {
+          current: current,
+          selectValue: this.searchBrand.selectValue,
+        }).then((resp) => {
+          if (resp.data.code === 200) {
+            console.log(resp.data.data.list);
+            this.brandList = resp.data.data.list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+            messageTip("查询成功！", "success");
+          } else {
+            messageTip("查询失败！", "error");
+          }
+        })
+      } else {
+        doGet("/api/product/brand/brand", {
+          // 当前页
+          current: current
+        }).then(resp => {
+          if (resp.data.code === 200) {
+            console.log(resp)
+            this.brandList = resp.data.data.list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+          }
+        })
+      }
+    },
+    submitSearch() {
+      let selectValue = this.searchBrand.selectValue;
+      if (selectValue === "") {
+        messageTip("请输入查询条件！", "error")
+        return;
+      }
+      this.$refs.searchBrandRefForm.validate((isValid) => {
+        if (isValid) {
+          this.isSearch = true;
+          this.getData(1);
         }
       })
+      //alert(selectValue)
+
+    },
+    reFlash() {
+      this.$router.go(0);
+    },
+    onCompStart() {
+      this.isComposing = true;
+    },
+    onCompEnd() {
+      // 结束合成后，下一次回车才算真正提交
+      this.isComposing = false;
+    },
+    onKeyupEnter() {
+      if (this.isComposing) return; // 中文输入法合成阶段的回车不触发搜索
+      this.submitSearch();          // 等价于点击搜索按钮
     },
   },
   mounted() {
@@ -521,6 +593,11 @@ export default defineComponent({
 }
 
 .upload-demo {
+  margin-top: 20px;
+}
+
+.mySearch {
+  margin-left: 10px;
   margin-top: 20px;
 }
 </style>

@@ -2,6 +2,7 @@ package com.sangui.sanguimall.product.mapper;
 
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.product.model.entity.BrandDo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -24,4 +25,6 @@ public interface BrandMapper {
     int deleteByIds(String ids);
 
     List<BrandDo> selectBrandByIds(String ids);
+
+    List<BrandDo> selectBrandBySelect(@Param("selectValue")String selectValue);
 }

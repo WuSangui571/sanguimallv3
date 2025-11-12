@@ -111,4 +111,19 @@ public class BrandServiceImpl implements BrandService {
         System.out.println("批量删除的结果：" + message);
         return brandMapper.deleteByIds(ids);
     }
+
+    @Override
+    public PageInfo<BrandDo> getBrandsBySelect(Integer current, String selectValue) {
+        // 1. 设置 PageHelper
+        PageHelper.startPage(current, Constants.PAGE_SIZE);
+        // 2. 查询
+        List<BrandDo> list = brandMapper.selectBrandBySelect(selectValue);
+
+        for (BrandDo brandDo : list) {
+            String url = (String)thirdPartyFeignClient.getSignedUrl(brandDo.getLogo()).getData();
+            brandDo.setLogo(url);
+        }
+        // 3. 封装分页数据到 PageInfo
+        return new PageInfo<>(list);
+    }
 }

@@ -28,4 +28,6 @@ public interface BrandService {
     int delBrandById(Long id);
 
     int delBrandByIds(String ids);
+
+    PageInfo<BrandDo> getBrandsBySelect(Integer current, String selectValue);
 }

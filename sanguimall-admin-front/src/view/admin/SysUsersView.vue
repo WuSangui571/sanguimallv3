@@ -12,6 +12,10 @@
               style="max-width: 600px"
               placeholder="请输入具体的模糊查询"
               class="input-with-select"
+              @keydown.enter.prevent
+              @keyup.enter="onKeyupEnter"
+              @compositionstart="onCompStart"
+              @compositionend="onCompEnd"
           >
             <template #prepend>
               <el-select v-model="searchUser.selectKey" placeholder="请选择" style="width: 115px">
@@ -152,6 +156,7 @@ export default defineComponent({
       searchUserRules: {
         selectValue: [
           {max: 16, message: '查询条件在 16 个字符之内', trigger: 'blur'},
+          { pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/, message: '只允许输入中文、英文、数字、下划线或空格！', trigger: 'blur' }
         ],
       },
       isSearch:false,
@@ -208,6 +213,8 @@ export default defineComponent({
       },
       selectedIds: [],
       selectedNames: [],
+      // 是否处于中文输入法合成中
+      isComposing: false,
     }
   },
   methods: {
@@ -431,6 +438,17 @@ export default defineComponent({
           }
         })
       }
+    },
+    onCompStart() {
+      this.isComposing = true;
+    },
+    onCompEnd() {
+      // 结束合成后，下一次回车才算真正提交
+      this.isComposing = false;
+    },
+    onKeyupEnter() {
+      if (this.isComposing) return; // 中文输入法合成阶段的回车不触发搜索
+      this.submitSearch();          // 等价于点击搜索按钮
     },
   },
   mounted() {

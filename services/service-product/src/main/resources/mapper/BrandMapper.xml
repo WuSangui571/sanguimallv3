@@ -21,6 +21,17 @@
         from pms_brand
         where brand_id in (${ids,jdbcType=BIGINT})
     </select>
+    <select id="selectBrandBySelect" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pms_brand
+        <where>
+            <if test="selectValue != null and selectValue != ''">
+                <bind name="kw" value="'%' + selectValue + '%'" />
+                (name like #{kw} or descript like #{kw})
+            </if>
+        </where>
+    </select>
     <select id="selectBrandByPage" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

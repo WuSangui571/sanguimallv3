@@ -101,4 +101,15 @@ public class BrandController {
         int len = ids.split(",").length;
         return count >= len ? R.ok() : R.fail();
     }
+
+    @GetMapping("/searchBrand")
+    public R getBrandsBySelect(@RequestParam(value = "current",required = false)Integer current,
+                              @RequestParam(value = "selectValue")String selectValue){
+        if (current == null){
+            current = 1;
+        }
+        PageInfo<BrandDo> pageInfo = brandService.getBrandsBySelect(current,selectValue);
+
+        return R.ok(pageInfo);
+    }
 }
