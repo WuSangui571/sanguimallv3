@@ -13,4 +13,5 @@ import lombok.Data;
 public class CategoryBrandRelationVo {
     private Long id;
     private String catelogName;
+    private String path;
 }

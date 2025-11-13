@@ -156,7 +156,7 @@
   </el-dialog>
   <!--关联分类的窗口  -->
   <el-dialog v-model="relationWindows" :title="relationBrandNameTitle"
-             width="400" draggable>
+             width="700" draggable @close="closeRelation">
     <el-table
         :data="relationList"
         style="width: 100%">
@@ -164,22 +164,79 @@
       <!--若 type 为 id，则该字段会自动增长-->
       <el-table-column type="index" label="序号" width="60"/>
       <el-table-column property="catelogName" label="分类名" width="120"/>
-      <el-table-column label="操作">
-        <el-button type="danger">移除</el-button>
+      <el-table-column label="操作" width="100">
+        <template #default="scope">
+          <el-button type="danger" @click="delRelation(scope.row.id,scope.row.catelogName)">移除</el-button>
+        </template>
       </el-table-column>
+      <el-table-column property="path" label="详细分类" width="300"/>
+
     </el-table>
     <el-pagination
         background
         layout="prev, pager, next"
         :page-size=relationMyPageSize
         :total=relationMyTotal
+        :current-page="relationMyPage"
         @prev-click="toRelationPage"
         @current-change="toRelationPage"
-        @next-click="toRelationPage"/>
+        @next-click="toRelationPage"
+        class="myAddProductAttrGroupPage"/>
+    <div class="m-4">
+      <el-button
+          key="success"
+          type="success"
+          text
+          bg
+      >
+        添加关联分类 ->
+      </el-button>
+      <el-select
+          v-model="selectedOneOptionsVo.id"
+          placeholder="请选择一级分类"
+          filterable
+          style="width: 150px"
+          @change="oneOptionsChange">
+        <el-option
+            v-for="item in oneOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-select
+          v-model="selectedTwoOptionsVo.id"
+          placeholder="请选择二级分类"
+          filterable
+          style="width: 150px"
+          v-if="seeTwoOptionsFlag"
+          @change="twoOptionsChange">
+        <el-option
+            v-for="item in twoOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-select
+          v-model="selectedThreeOptionsVo.id"
+          placeholder="请选择三级分类"
+          filterable
+          style="width: 150px"
+          v-if="seeThreeOptionsFlag"
+          @change="threeOptionsChange">
+        <el-option
+            v-for="item in threeOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-button type="primary" v-if="seeTwoOptionsFlag" @click="reset">重置</el-button>
+    </div>
+
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="success" @click="addRelation()" >添加关联</el-button>
+        <el-button type="success" @click="addRelation()" v-if="selectThreeOptionsOver">添加关联</el-button>
+        <el-button type="success" v-if="!selectThreeOptionsOver" :disabled="true" plain>添加关联</el-button>
         <el-button @click="closeRelation">取消</el-button>
       </div>
     </template>
@@ -281,11 +338,43 @@ export default defineComponent({
       relationList: [{
         id: 0,
         catelogName: "",
+        path: "",
       }],
-      relationBrandNameTitle:"",
-      relationBrandId:0,
+      relationBrandNameTitle: "",
+      relationBrandId: 0,
+
       relationMyPageSize: 0,
       relationMyTotal: 0,
+      relationMyPage: 1,  // 初始页码设置为 1
+      seeTwoOptionsFlag: false,
+      seeThreeOptionsFlag: false,
+
+
+      selectedOneOptionsVo: {
+        id: "",
+        name: "",
+      },
+      oneOptionsData: [{
+        id: "",
+        name: "",
+      }],
+      selectedTwoOptionsVo: {
+        id: "",
+        name: "",
+      },
+      twoOptionsData: [{
+        id: 0,
+        name: "",
+      }],
+      selectedThreeOptionsVo: {
+        id: "",
+        name: "",
+      },
+      threeOptionsData: [{
+        id: 0,
+        name: "",
+      }],
+      selectThreeOptionsOver: false,
     }
 
   },
@@ -622,8 +711,10 @@ export default defineComponent({
       if (this.isComposing) return; // 中文输入法合成阶段的回车不触发搜索
       this.submitSearch();          // 等价于点击搜索按钮
     },
-    relation(id,name) {
+    relation(id, name) {
       this.relationBrandNameTitle = "关联分类-" + name;
+      this.relationMyPageSize = 0;  // 重置每页条数
+      this.relationMyTotal = 0;
       this.relationBrandId = id;
       this.relationWindows = true;
       this.getRelationData(1, id);
@@ -635,24 +726,160 @@ export default defineComponent({
         id: id
       }).then(resp => {
         if (resp.data.code === 200) {
-          // console.log(resp)
+          console.log(resp)
           this.relationList = resp.data.data.list;
           this.relationMyTotal = resp.data.data.total;
           this.relationMyPageSize = resp.data.data.pageSize;
+          this.relationMyPage = current;
         }
       })
     },
     closeRelation() {
       this.relationWindows = false;
+      this.selectThreeOptionsOver = false;
+      // 重置分页状态
+      this.relationMyPageSize = 0;  // 每页条数（如果需要的话）
+      this.relationMyTotal = 0;     // 总条数（如果需要的话）
+
+      this.reset();
     },
-    toRelationPage(current){
-      this.getRelationData(current,this.relationBrandId)
+    toRelationPage(current) {
+      this.getRelationData(current, this.relationBrandId)
+    },
+    getOneOptionData() {
+      doGet("/api/product/category/one", {}).then(resp => {
+        if (resp.data.code === 200) {
+          this.oneOptionsData = resp.data.data;
+        }
+      })
+    },
+    oneOptionsChange() {
+      if (this.seeTwoOptionsFlag === true) {
+        this.selectedTwoOptionsVo = {
+          id: "",
+          name: "",
+        };
+        this.twoOptionsData = [{
+          id: "",
+          name: "",
+        }];
+        this.selectedThreeOptionsVo = {
+          id: "",
+          name: "",
+        };
+        this.threeOptionsData = [{
+          id: "",
+          name: "",
+        }];
+        this.seeTable = false;
+      }
+      this.seeTwoOptionsFlag = true;
+      this.getTwoOptionsData();
+    },
+    getTwoOptionsData() {
+      doGet("/api/product/category/two", {
+        oneOptionsId: this.selectedOneOptionsVo.id
+      }).then(resp => {
+        //console.log("二级菜单数据");
+        //console.log(resp.data.data);
+        if (resp.data.code === 200) {
+          this.twoOptionsData = resp.data.data;
+        }
+      })
+    },
+    twoOptionsChange() {
+      if (this.seeThreeOptionsFlag === true) {
+        this.selectedThreeOptionsVo = {
+          id: "",
+          name: "",
+        };
+        this.threeOptionsData = [{
+          id: "",
+          name: "",
+        }];
+        this.seeTable = false;
+      }
+      this.seeThreeOptionsFlag = true;
+      this.getThreeOptionsData();
+    },
+    getThreeOptionsData() {
+      doGet("/api/product/category/three", {
+        twoOptionsId: this.selectedTwoOptionsVo.id
+      }).then(resp => {
+        //console.log(resp.data.data);
+        if (resp.data.code === 200) {
+          this.threeOptionsData = resp.data.data;
+        }
+      })
+    },
+    threeOptionsChange() {
+      this.selectThreeOptionsOver = true;
+
+    },
+    reset() {
+      this.seeTwoOptionsFlag = false;
+      this.seeThreeOptionsFlag = false;
+      this.selectThreeOptionsOver = false;
+      this.selectedOneOptionsVo = {
+        id: "",
+        name: "",
+      };
+      this.selectedTwoOptionsVo = {
+        id: "",
+        name: "",
+      };
+      this.twoOptionsData = [{
+        id: "",
+        name: "",
+      }];
+      this.selectedThreeOptionsVo = {
+        id: "",
+        name: "",
+      };
+      this.threeOptionsData = [{
+        id: "",
+        name: "",
+      }];
+
+    },
+    addRelation() {
+      let formData = new FormData();
+      formData.append('brandId', this.relationBrandId);
+      formData.append('categoryId', this.selectedThreeOptionsVo.id);
+      doPost("/api/product/categoryBrandRelation/relation", formData).then((resp) => {
+        if (resp.data.code === 200) {
+          messageTip("添加关联成功！", "success");
+          this.getRelationData(1, this.relationBrandId);
+          this.reset();
+        } else {
+          messageTip("添加关联失败！原因：" + resp.data.msg, "error");
+        }
+      })
+    },
+    // 删除指定
+    delRelation(id, name) {
+      messageConfirm("确认移除 \"" + this.relationBrandNameTitle.slice(5) + "\" 关联的 \"" + name + "\" 吗？", "温馨提示").then(() => {
+        let url = "/api/product/categoryBrandRelation/relation/" + id
+        //alert(url)
+        doDelete(url, {}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已删除" + name, "success")
+            this.getRelationData(1, this.relationBrandId);
+            this.reset();
+          } else {
+            messageTip("删除失败！", "error")
+          }
+        })
+      }).catch(() => {
+        // 用户点击取消就会触发 catch 里
+        messageTip("已取消删除！", "error")
+      })
     },
   },
   mounted() {
     this.getData(1);
-  }
-  ,
+    this.getOneOptionData();
+  },
   inject: ['reload'],
 })
 </script>
@@ -675,4 +902,7 @@ export default defineComponent({
   margin-top: 20px;
 }
 
+.myAddProductAttrGroupPage {
+  margin-bottom: 10px;
+}
 </style>

@@ -1,4 +1,4 @@
-package com.sangui.sanguimall.product.service;
+package com.sangui.sanguimall.product.manager;
 
 
 import com.github.pagehelper.PageInfo;
@@ -7,14 +7,12 @@ import com.sangui.sanguimall.product.model.vo.CategoryBrandRelationVo;
 
 /**
  * @Author: sangui
- * @CreateTime: 2025-11-12
+ * @CreateTime: 2025-11-13
  * @Description:
  * @Version: 1.0
  */
-public interface CategoryBrandRelationService {
-    PageInfo<CategoryBrandRelationVo> getRelationsById(Integer current, Long brandId);
-
+public interface CateBrandRelationManager {
     int addRelation(CategoryBrandRelationQuery categoryBrandRelationQuery);
 
-    int delRelationById(Long id);
+    PageInfo<CategoryBrandRelationVo> getRelationsById(Integer current, Long brandId);
 }

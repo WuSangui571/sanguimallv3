@@ -19,6 +19,14 @@
         from pms_category_brand_relation
         where brand_id = #{brandId,jdbcType=BIGINT}
     </select>
+
+    <select id="selectByCategoryIdAndBrandId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from pms_category_brand_relation
+        where brand_id = #{brandId,jdbcType=BIGINT}
+        and catelog_id = #{categoryId,jdbcType=BIGINT}
+    </select>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
