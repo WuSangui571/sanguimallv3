@@ -1,6 +1,7 @@
 package com.sangui.sanguimall.product.service.impl;
 
 
+import com.sangui.sanguimall.product.manager.CategoryManager;
 import com.sangui.sanguimall.product.mapper.CategoryMapper;
 import com.sangui.sanguimall.product.model.converter.CategoryConverter;
 import com.sangui.sanguimall.product.model.entity.CategoryDo;
@@ -29,6 +30,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     private CategoryConverter categoryConverter;
+
+    @Resource
+    private CategoryManager categoryManager;
 
     @Override
     public List<CategoryVo> listWithTree() {
@@ -107,10 +111,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public int editCategory(CategoryQuery categoryQuery) {
-        Long catId = categoryQuery.getCatId();
-        CategoryDo categoryDo = categoryMapper.selectByPrimaryKey(catId);
-        categoryDo.setName(categoryQuery.getNewNodeLabel());
-        return categoryMapper.updateByPrimaryKeySelective(categoryDo);
+        return categoryManager.editCategory(categoryQuery);
+
     }
 
     @Override

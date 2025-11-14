@@ -5,6 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.constant.Constants;
 import com.sangui.sanguimall.product.feign.ThirdPartyFeignClient;
+import com.sangui.sanguimall.product.manager.BrandManager;
 import com.sangui.sanguimall.product.mapper.BrandMapper;
 import com.sangui.sanguimall.product.model.converter.BrandConverter;
 import com.sangui.sanguimall.product.model.entity.BrandDo;
@@ -12,7 +13,6 @@ import com.sangui.sanguimall.product.model.query.AddBrandQuery;
 import com.sangui.sanguimall.product.model.query.BrandEditShowStatusQuery;
 import com.sangui.sanguimall.product.model.vo.SingleBrandVo;
 import com.sangui.sanguimall.product.service.BrandService;
-import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +35,9 @@ public class BrandServiceImpl implements BrandService {
 
     @Resource
     ThirdPartyFeignClient thirdPartyFeignClient;
+
+    @Resource
+    BrandManager brandManager;
 
     @Override
     public PageInfo<BrandDo> getBrandsByPage(Integer current) {
@@ -81,15 +84,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public int editBrand(AddBrandQuery addBrandQuery) {
-        BrandDo brandDo = new BrandDo();
-        brandDo.setBrandId(addBrandQuery.getId());
-        brandDo.setName(addBrandQuery.getName());
-        brandDo.setLogo(addBrandQuery.getLogo());
-        brandDo.setDescript(addBrandQuery.getDescript());
-        brandDo.setShowStatus(addBrandQuery.getShowStatus());
-        brandDo.setFirstLetter(addBrandQuery.getFirstLetter());
-        brandDo.setSort(addBrandQuery.getSort());
-        return brandMapper.updateByPrimaryKeySelective(brandDo);
+        return brandManager.updateByPrimaryKeySelective(addBrandQuery);
     }
 
     @Override

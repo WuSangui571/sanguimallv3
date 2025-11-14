@@ -21,4 +21,7 @@ public interface CategoryBrandRelationMapper {
     List<CategoryBrandRelationDo> selectRelationsByBrandId(Long brandId);
 
     CategoryBrandRelationDo selectByCategoryIdAndBrandId(@Param("brandId") Long brandId, @Param("categoryId") Long categoryId);
+
+
+    List<CategoryBrandRelationDo> selectByCategoryId(Long catId);
 }
