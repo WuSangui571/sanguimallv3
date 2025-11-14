@@ -58,7 +58,7 @@
       <el-table-column property="icon" label="组图标" width="240"/>
       <el-table-column label="操作">
         <template #default="scope">
-          <!--        <el-button type="primary">详情</el-button>-->
+          <el-button type="primary">关联</el-button>
           <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
           <el-button type="danger" @click="del(scope.row.id,scope.row.attrGroupName)">删除</el-button>
         </template>

@@ -51,7 +51,7 @@
             <el-menu-item index="/dashboard/product/attr/group">
               属性分组
             </el-menu-item>
-            <el-menu-item index="3-3-2">
+            <el-menu-item index="/dashboard/product/attr/attr">
               规格参数
             </el-menu-item>
             <el-menu-item index="3-3-3">

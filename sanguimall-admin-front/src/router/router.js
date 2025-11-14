@@ -57,9 +57,14 @@ let router = createRouter({
                 {
                     path: "product/brand",
                     component: () => import("../view/product/BrandView.vue"),
-                },{
+                },
+                {
                     path: "product/attr/group",
                     component: () => import("../view/product/attr/ProductAttrGroupView.vue"),
+                },
+                {
+                    path: "product/attr/attr",
+                    component: () => import("../view/product/attr/ProductAttrView.vue"),
                 },
             ]
         },
