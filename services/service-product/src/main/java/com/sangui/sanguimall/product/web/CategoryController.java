@@ -92,5 +92,14 @@ public class CategoryController {
     }
 
 
-
+    /**
+     * 响应给前端指定 id 的路径
+     * @param id 分类 id
+     * @return 分类路径
+     */
+    @GetMapping("/getCategoryPath/{id}")
+    public R getCategoryPath(@PathVariable("id")Long id){
+        String path = categoryService.getCategoryPath(id);
+        return R.ok(path);
+    }
 }

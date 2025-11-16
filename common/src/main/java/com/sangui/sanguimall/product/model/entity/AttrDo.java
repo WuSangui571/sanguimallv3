@@ -6,6 +6,7 @@ import lombok.Data;
 /**
  * 商品属性
  * pms_attr
+ * @author sangui
  */
 @Data
 public class AttrDo implements Serializable {
@@ -60,4 +61,6 @@ public class AttrDo implements Serializable {
     private Byte showDesc;
 
     private static final long serialVersionUID = 1L;
+
+    private CategoryDo categoryDo;
 }

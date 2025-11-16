@@ -51,7 +51,7 @@ public class AttrGroupServiceImpl implements AttrGroupService {
 
     @Override
     public int addAttrGroup(AttrGroupQuery attrGroupQuery) {
-        System.out.println("后端接收到的 attrGroupQuery = "+ attrGroupQuery);
+        //System.out.println("后端接收到的 attrGroupQuery = "+ attrGroupQuery);
         AttrGroupDo attrGroupDo = new AttrGroupDo();
         attrGroupDo.setAttrGroupName(attrGroupQuery.getAttrGroupName());
         attrGroupDo.setSort(attrGroupQuery.getSort());

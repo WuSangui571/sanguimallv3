@@ -9,7 +9,6 @@
       </div>
       <!--侧导航条-->
       <el-menu
-          default-active="2"
           class="el-menu-vertical-demo"
           :unique-opened="true"
           :collapse="isCollapse"
@@ -72,19 +71,27 @@
         </el-sub-menu>
         <el-sub-menu index="4">
           <template #title>
-            <el-icon><UserFilled /></el-icon>
+            <el-icon>
+              <UserFilled/>
+            </el-icon>
             <span>用户管理</span>
           </template>
           <el-menu-item index="/dashboard/admin/sysUsers">
-            <el-icon><Grid /></el-icon>
+            <el-icon>
+              <Grid/>
+            </el-icon>
             所有用户
           </el-menu-item>
           <el-menu-item :index='personalUrl'>
-            <el-icon><User /></el-icon>
+            <el-icon>
+              <User/>
+            </el-icon>
             个人信息
           </el-menu-item>
           <el-menu-item index='/dashboard/admin/roles'>
-            <el-icon><Avatar /></el-icon>
+            <el-icon>
+              <Avatar/>
+            </el-icon>
             角色管理
           </el-menu-item>
         </el-sub-menu>
@@ -99,7 +106,7 @@
         <el-dropdown :hide-on-click="false">
           <span class="el-dropdown-link">
 <!--            此处动态获取用户姓名-->
-            {{user.username}}
+            {{ user.username }}
             <el-icon class="el-icon--right"><arrow-down/></el-icon>
           </span>
           <template #dropdown>
@@ -143,7 +150,8 @@ export default defineComponent({
       currentRouterPath: "",
       // 控制该区域页面内容是否显示
       isRouterAlive: true,
-      personalUrl:'',
+      personalUrl: '',
+      // 当前访问路径，默认为空
     }
   },
   provide() {
@@ -164,28 +172,28 @@ export default defineComponent({
   methods: {
 
     // 退出登录的方法
-    logout(){
-      doGet("/api/admin/sysUser/logout",{}).then((resp) =>{
+    logout() {
+      doGet("/api/admin/sysUser/logout", {}).then((resp) => {
         // 看看响应的形式是怎么样的
         console.log(resp);
-        if (resp.data.code === 200){
-          messageTip("退出成功！","success");
+        if (resp.data.code === 200) {
+          messageTip("退出成功！", "success");
           removeToken();
           window.location.href = "/";
-        }else{
-          messageConfirm("退出异常，是否强制退出？","温馨提示").then(() =>{
+        } else {
+          messageConfirm("退出异常，是否强制退出？", "温馨提示").then(() => {
             removeToken();
             window.location.href = "/";
           }).catch(() => {
             // 用户点击取消就会触发 catch 里
-            messageTip("取消强制退出","warning")
+            messageTip("取消强制退出", "warning")
           })
         }
       })
     },
-    loadLoginUser(){
+    loadLoginUser() {
       // 发送给后端请求，请求当前登录用户
-      doGet("/api/admin/sysUser/info",{}).then((resp) =>{
+      doGet("/api/admin/sysUser/info", {}).then((resp) => {
         // 看看响应的形式是怎么样的
         console.log(resp);
         // console.log(resp.data.data.name);
@@ -194,7 +202,7 @@ export default defineComponent({
         console.log(this.personalUrl);
       })
     },
-    gotoMyInfo(){
+    gotoMyInfo() {
       this.$router.push(this.personalUrl)
     },
     // 折叠左侧菜单的方法
@@ -206,8 +214,16 @@ export default defineComponent({
       let path = this.$route.path;
       //alert(path)
       let pathArr = path.split("/");
-      //alert(pathArr)
-      let simplePath = '/' + pathArr[1] + '/' + pathArr[2];
+      // alert(pathArr)
+      // alert(pathArr[4])
+      let simplePath
+      if (pathArr[4] != undefined) {
+        // alert("yes!value=" + pathArr[4])
+        simplePath = '/' + pathArr[1] + '/' + pathArr[2] + '/' + pathArr[3] + '/' + pathArr[4];
+      }else {
+        // alert("no")
+        simplePath = '/' + pathArr[1] + '/' + pathArr[2] + '/' + pathArr[3]
+      }
       //alert(simplePath)
       this.currentRouterPath = simplePath;
     },
@@ -261,13 +277,15 @@ export default defineComponent({
   /* 发现菜单天然有个 1px 的右边框，设置无边框*/
   border-right: 0;
 }
+
 /* 设置用户姓名下拉列表的样式*/
-.el-dropdown{
+.el-dropdown {
   /* 往右漂移，即放在最右边*/
   float: right;
   /* 设置行高与高度一致，即可上下居中*/
   line-height: 35px;
 }
+
 /* 设置折叠图标的样式*/
 .fold-icon {
   /* 使鼠标悬停图标时，鼠标变成手*/

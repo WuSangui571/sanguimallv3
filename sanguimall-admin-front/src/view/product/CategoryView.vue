@@ -1,37 +1,39 @@
 <template>
-  <el-tree
-      style="max-width: 400px"
-      :data="dataSource"
-      show-checkbox
-      node-key="id"
-      default-expand-all
-      :expand-on-click-node="false"
-      draggable
-      :allow-drop="allowDrop"
-      @node-drop="handleDrop"
-  >
-    <template #default="{ node, data }">
-      <div class="custom-tree-node">
-        <span>{{ node.label }}</span>
-        <div>
-          <el-button type="primary" link @click="append(data)" v-if="data.level !== 3">
-            添加
-          </el-button>
-          <el-button type="info" link @click="edit(node,data)">
-            编辑
-          </el-button>
-          <el-button
-              style="margin-left: 4px"
-              type="danger"
-              link
-              @click="remove(node, data)"
-          >
-            删除
-          </el-button>
+  <div v-loading="loading" style="max-width: 400px;">
+    <el-tree
+        style="max-width: 400px"
+        :data="dataSource"
+        show-checkbox
+        node-key="id"
+        default-expand-all
+        :expand-on-click-node="false"
+        draggable
+        :allow-drop="allowDrop"
+        @node-drop="handleDrop"
+    >
+      <template #default="{ node, data }">
+        <div class="custom-tree-node">
+          <span>{{ node.label }}</span>
+          <div>
+            <el-button type="primary" link @click="append(data)" v-if="data.level !== 3">
+              添加
+            </el-button>
+            <el-button type="info" link @click="edit(node,data)">
+              编辑
+            </el-button>
+            <el-button
+                style="margin-left: 4px"
+                type="danger"
+                link
+                @click="remove(node, data)"
+            >
+              删除
+            </el-button>
+          </div>
         </div>
-      </div>
-    </template>
-  </el-tree>
+      </template>
+    </el-tree>
+  </div>
   <el-dialog v-model="askNewLabelTableVisible" title="添加新节点" width="500">
     <el-form :model="askNewLabelFrom">
       <el-form-item label="新节点名字">
@@ -73,21 +75,23 @@ export default defineComponent({
   name: "DashboardView",
   data() {
     return {
-      dataSource: {
-        id: 0,
-        label: "",
-        level: 0,
-        children: {
-          id: 0,
-          label: "",
-          level: 0,
-          children: {
-            id: 0,
-            label: "",
-            level: 0,
-          }
-        }
-      },
+      // dataSource: {
+      //   id: 0,
+      //   label: "",
+      //   level: 0,
+      //   children: {
+      //     id: 0,
+      //     label: "",
+      //     level: 0,
+      //     children: {
+      //       id: 0,
+      //       label: "",
+      //       level: 0,
+      //     }
+      //   }
+      // },
+      dataSource: [],   // ✅ 改成数组
+      loading: false,   // ✅ 加一个 loading 状态
       id: 0,
       askNewLabelTableVisible: false,
       askNewLabelFrom: {},
@@ -219,11 +223,15 @@ export default defineComponent({
       })
     },
     getData() {
+      this.loading = true;
       doGet("/api/product/category/list/tree", {}).then(resp => {
         if (resp.data.code === 200) {
           //console.log(resp.data.data)
+          this.loading = false;
           this.dataSource = resp.data.data;
           //console.log(this.dataSource)
+        }else {
+          this.loading = false;
         }
       })
     },

@@ -30,4 +30,6 @@ public interface CategoryService {
     List<OneTwoThreeCategoryVo> getTwo(Long oneOptionsId);
 
     List<OneTwoThreeCategoryVo> getThree(Long twoOptionsId);
+
+    String getCategoryPath(Long id);
 }
