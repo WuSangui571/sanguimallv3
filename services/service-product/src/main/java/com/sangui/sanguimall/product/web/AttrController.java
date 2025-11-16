@@ -5,11 +5,14 @@ import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrEnableQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrSearchTypeQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrShowDescQuery;
+import com.sangui.sanguimall.product.model.vo.AttrForAttrTypeOptionVo;
 import com.sangui.sanguimall.product.model.vo.AttrVo;
 import com.sangui.sanguimall.product.service.AttrService;
 import com.sangui.sanguimall.result.R;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author: sangui
@@ -67,5 +70,11 @@ public class AttrController {
     public R editAttrEnable(EditAttrEnableQuery editAttrEnableQuery) {
         int count = attrService.editAttrEnable(editAttrEnableQuery);
         return count >= 1 ? R.ok() : R.fail();
+    }
+
+    @GetMapping("/attrTypeOption")
+    public R getAttrTypeOption(){
+        List<AttrForAttrTypeOptionVo> list = attrService.getAttrTypeOption();
+        return R.ok(list);
     }
 }

@@ -42,7 +42,7 @@
   </div>
   <div class="myTable" v-if="seeTable">
     <!--两个按钮-->
-    <el-button type="primary" @click="addAttrGroupWindows=true">添加属性分组</el-button>
+    <el-button type="primary" @click="add">添加属性分组</el-button>
     <el-button type="danger" @click="batchDel">批量删除</el-button>
     <!--表格开始-->
     <el-table
@@ -118,7 +118,7 @@ export default {
       seeTable: false,
 
       selectedOneOptionsVo: {
-        id: 0,
+        id: "",
         name: "",
       },
       oneOptionsData: [{
@@ -126,7 +126,7 @@ export default {
         name: "",
       }],
       selectedTwoOptionsVo: {
-        id: 0,
+        id: "",
         name: "",
       },
       twoOptionsData: [{
@@ -134,7 +134,7 @@ export default {
         name: "",
       }],
       selectedThreeOptionsVo: {
-        id: 0,
+        id: "",
         name: "",
       },
       threeOptionsData: [{
@@ -348,13 +348,11 @@ export default {
     },
     // 新增属性分组
     add() {
-      this.addAttrGroup = {
-        id: 0,
-        attrGroupName: "",
-        sort: 0,
-        descript: "",
-        icon: "",
-      };
+      this.addAttrGroup.id = 0;
+      this.addAttrGroup.attrGroupName = "";
+      this.addAttrGroup.sort = 0;
+      this.addAttrGroup.descript = "";
+      this.addAttrGroup.icon = "";
       this.addAttrGroupWindows = true
     },
     // 编辑指定 id 的属性分类

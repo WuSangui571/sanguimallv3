@@ -10,6 +10,7 @@ import com.sangui.sanguimall.product.model.entity.AttrDo;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrEnableQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrSearchTypeQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrShowDescQuery;
+import com.sangui.sanguimall.product.model.vo.AttrForAttrTypeOptionVo;
 import com.sangui.sanguimall.product.model.vo.AttrVo;
 import com.sangui.sanguimall.product.service.AttrService;
 import jakarta.annotation.Resource;
@@ -114,5 +115,14 @@ public class AttrServiceImpl implements AttrService {
             attrDo.setEnable(0L);
         }
         return attrMapper.updateByPrimaryKeySelective(attrDo);
+    }
+
+    @Override
+    public List<AttrForAttrTypeOptionVo> getAttrTypeOption() {
+        List<AttrForAttrTypeOptionVo> list = new ArrayList<>();
+        list.add(new AttrForAttrTypeOptionVo(0,"销售属性"));
+        list.add(new AttrForAttrTypeOptionVo(1,"基本属性"));
+        list.add(new AttrForAttrTypeOptionVo(2,"既是销售属性又是基本属性"));
+        return list;
     }
 }

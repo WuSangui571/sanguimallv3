@@ -5,7 +5,10 @@ import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrEnableQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrSearchTypeQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrShowDescQuery;
+import com.sangui.sanguimall.product.model.vo.AttrForAttrTypeOptionVo;
 import com.sangui.sanguimall.product.model.vo.AttrVo;
+
+import java.util.List;
 
 /**
  * @Author: sangui
@@ -21,4 +24,6 @@ public interface AttrService {
     int editAttrShowDesc(EditAttrShowDescQuery editAttrShowDescQuery);
 
     int editAttrEnable(EditAttrEnableQuery editAttrEnableQuery);
+
+    List<AttrForAttrTypeOptionVo> getAttrTypeOption();
 }
