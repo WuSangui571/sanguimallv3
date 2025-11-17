@@ -1,6 +1,9 @@
 <template>
-  <!--两个按钮-->
-  <el-button type="primary" @click="add">添加角色</el-button>
+  <div class="toolbar">
+    <!--两个按钮-->
+    <el-button type="primary" @click="add">添加角色</el-button>
+  </div>
+  <el-card class="content-card" shadow="hover">
   <!--表格开始-->
   <el-table
       :data="roleList"
@@ -21,7 +24,7 @@
       <template #default="scope">
         <el-button type="primary" @click="view(scope.row.id)">详情</el-button>
         <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
-        <el-button type="danger"  @click="del(scope.row.id,scope.row.roleName,scope.row.userCount)">删除</el-button>
+        <el-button type="danger" @click="del(scope.row.id,scope.row.roleName,scope.row.userCount)">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -34,6 +37,7 @@
       @prev-click="toPage"
       @current-change="toPage"
       @next-click="toPage"/>
+  </el-card>
   <!--这是新增角色的弹窗-->
   <el-dialog v-model="addRoleWindows" :title="addRole.id>0?'编辑角色':'添加角色'" width="600" draggable>
     <el-form :model="addRole" label-width="110px" :rules="addRoleRules" ref="addRoleRefForm">
@@ -103,8 +107,8 @@ export default {
   },
   methods: {
     // 删除指定角色
-    del(id, roleName,userCount) {
-      if (userCount !== 0){
+    del(id, roleName, userCount) {
+      if (userCount !== 0) {
         messageTip("仅可删除人数为 0 的角色，删除失败！", "error")
         return;
       }
@@ -167,7 +171,7 @@ export default {
                 messageTip("编辑用户失败！请检查输入的条件！", "error");
               }
             })
-          }else {
+          } else {
             doPost("/api/admin/sysRole/sysRole", formData).then((resp) => {
               if (resp.data.code === 200) {
                 messageTip("添加角色成功！", "success");
@@ -239,5 +243,14 @@ export default {
 
 .el-pagination {
   margin-top: 20px;
+}
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
 }
 </style>

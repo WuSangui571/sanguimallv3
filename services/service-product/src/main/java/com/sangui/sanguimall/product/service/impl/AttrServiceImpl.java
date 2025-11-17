@@ -5,11 +5,15 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sangui.sanguimall.constant.Constants;
 import com.sangui.sanguimall.product.mapper.AttrMapper;
+import com.sangui.sanguimall.product.mapper.CategoryMapper;
 import com.sangui.sanguimall.product.model.converter.AttrConverter;
 import com.sangui.sanguimall.product.model.entity.AttrDo;
+import com.sangui.sanguimall.product.model.entity.CategoryDo;
+import com.sangui.sanguimall.product.model.query.attr.AddAttrQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrEnableQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrSearchTypeQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrShowDescQuery;
+import com.sangui.sanguimall.product.model.vo.AttrDetailVo;
 import com.sangui.sanguimall.product.model.vo.AttrForAttrTypeOptionVo;
 import com.sangui.sanguimall.product.model.vo.AttrVo;
 import com.sangui.sanguimall.product.service.AttrService;
@@ -32,6 +36,9 @@ public class AttrServiceImpl implements AttrService {
 
     @Resource
     AttrMapper attrMapper;
+
+    @Resource
+    CategoryMapper categoryMapper;
 
     @Override
     public PageInfo<AttrVo> getAttrsByPage(Integer current) {
@@ -124,5 +131,93 @@ public class AttrServiceImpl implements AttrService {
         list.add(new AttrForAttrTypeOptionVo(1,"基本属性"));
         list.add(new AttrForAttrTypeOptionVo(2,"既是销售属性又是基本属性"));
         return list;
+    }
+
+    @Override
+    public int addAttr(AddAttrQuery addAttrQuery) {
+        System.out.println(addAttrQuery);
+        AttrDo attrDo = new AttrDo();
+        attrDo.setAttrName(addAttrQuery.getAttrName());
+        attrDo.setSearchType(addAttrQuery.getSearchType());
+        attrDo.setValueType(addAttrQuery.getValueType());
+
+        String valueSelectWithDouHao = addAttrQuery.getValueSelect();
+        if (valueSelectWithDouHao != null) {
+            String valueSelect = valueSelectWithDouHao.replace(",", ";");
+            attrDo.setValueSelect(valueSelect);
+        }
+
+
+        attrDo.setIcon(addAttrQuery.getIcon());
+        attrDo.setAttrType(addAttrQuery.getAttrType());
+        attrDo.setEnable(addAttrQuery.getEnable());
+        attrDo.setCatelogId(addAttrQuery.getCatelogId());
+        attrDo.setShowDesc(addAttrQuery.getShowDesc());
+
+        return attrMapper.insertSelective(attrDo);
+    }
+
+    @Override
+    public AttrDetailVo getAttrDetail(Long attrId) {
+        AttrDo attrDo = attrMapper.selectByPrimaryKey(attrId);
+        if (attrDo == null) {
+            return null;
+        }
+        AttrDetailVo vo = new AttrDetailVo();
+        vo.setAttrId(attrDo.getAttrId());
+        vo.setAttrName(attrDo.getAttrName());
+        vo.setSearchType(attrDo.getSearchType());
+        vo.setValueType(attrDo.getValueType());
+        vo.setIcon(attrDo.getIcon());
+        vo.setValueSelect(attrDo.getValueSelect());
+        vo.setAttrType(attrDo.getAttrType());
+        vo.setEnable(attrDo.getEnable());
+        vo.setCatelogId(attrDo.getCatelogId());
+        vo.setShowDesc(attrDo.getShowDesc());
+        vo.setThreeCategoryId(attrDo.getCatelogId());
+
+        CategoryDo level3 = categoryMapper.selectByPrimaryKey(attrDo.getCatelogId());
+        if (level3 != null) {
+            vo.setTwoCategoryId(level3.getParentCid());
+            CategoryDo level2 = categoryMapper.selectByPrimaryKey(level3.getParentCid());
+            if (level2 != null) {
+                vo.setOneCategoryId(level2.getParentCid());
+            }
+        }
+        return vo;
+    }
+
+    @Override
+    public int editAttr(AddAttrQuery addAttrQuery) {
+        if (addAttrQuery.getId() == null) {
+            return 0;
+        }
+        AttrDo attrDo = attrMapper.selectByPrimaryKey(addAttrQuery.getId());
+        if (attrDo == null) {
+            return 0;
+        }
+        attrDo.setAttrName(addAttrQuery.getAttrName());
+        attrDo.setSearchType(addAttrQuery.getSearchType());
+        attrDo.setValueType(addAttrQuery.getValueType());
+        attrDo.setIcon(addAttrQuery.getIcon());
+        attrDo.setAttrType(addAttrQuery.getAttrType());
+        attrDo.setEnable(addAttrQuery.getEnable());
+        attrDo.setCatelogId(addAttrQuery.getCatelogId());
+        attrDo.setShowDesc(addAttrQuery.getShowDesc());
+        if (addAttrQuery.getValueSelect() != null) {
+            String valueSelect = addAttrQuery.getValueSelect().replace(",", ";");
+            attrDo.setValueSelect(valueSelect);
+        }
+        return attrMapper.updateByPrimaryKeySelective(attrDo);
+    }
+
+    @Override
+    public int delAttrById(Long id) {
+        return attrMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int delAttrByIds(String ids) {
+        return attrMapper.deleteByIds(ids);
     }
 }

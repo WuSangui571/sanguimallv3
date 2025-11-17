@@ -1,79 +1,82 @@
 <template>
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <!--两个按钮-->
-    <el-button type="primary" @click="add">添加用户</el-button>
-    <el-button type="danger" @click="batchDel">批量删除</el-button>
-    <div class="mySearch">
-      <el-form :model="searchUser" :rules="searchUserRules" ref="searchUserRefForm">
-<!--      <el-form :model="searchUser">-->
-        <el-form-item prop="selectValue">
-          <el-input
-              v-model="searchUser.selectValue"
-              style="max-width: 600px"
-              placeholder="请输入具体的模糊查询"
-              class="input-with-select"
-              @keydown.enter.prevent
-              @keyup.enter="onKeyupEnter"
-              @compositionstart="onCompStart"
-              @compositionend="onCompEnd"
-          >
-            <template #prepend>
-              <el-select v-model="searchUser.selectKey" placeholder="请选择" style="width: 115px">
-                <el-option label="账号" value="username"/>
-                <el-option label="邮箱" value="email"/>
-                <el-option label="手机" value="mobile"/>
-              </el-select>
-            </template>
-            <template #append>
-              <el-button :icon="Search" @click="submitSearch"/>
-            </template>
-          </el-input>
-        </el-form-item>
-      </el-form>
+<!--  <div style="display: flex; align-items: center; gap: 10px;">-->
+    <div class="toolbar">
+      <!--两个按钮-->
+      <el-button type="primary" @click="add">添加用户</el-button>
+      <el-button type="danger" @click="batchDel">批量删除</el-button>
+      <div class="mySearch">
+        <el-form :model="searchUser" :rules="searchUserRules" ref="searchUserRefForm">
+          <!--      <el-form :model="searchUser">-->
+          <el-form-item prop="selectValue">
+            <el-input
+                v-model="searchUser.selectValue"
+                style="max-width: 600px"
+                placeholder="请输入具体的模糊查询"
+                class="input-with-select"
+                @keydown.enter.prevent
+                @keyup.enter="onKeyupEnter"
+                @compositionstart="onCompStart"
+                @compositionend="onCompEnd"
+            >
+              <template #prepend>
+                <el-select v-model="searchUser.selectKey" placeholder="请选择" style="width: 115px">
+                  <el-option label="账号" value="username"/>
+                  <el-option label="邮箱" value="email"/>
+                  <el-option label="手机" value="mobile"/>
+                </el-select>
+              </template>
+              <template #append>
+                <el-button :icon="Search" @click="submitSearch"/>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <el-button type="success" @click="reFlash">重置</el-button>
     </div>
-    <el-button type="success" @click="reFlash">重置</el-button>
-  </div>
+<!--  </div>-->
+  <el-card class="content-card" shadow="hover">
+    <!--表格开始-->
+    <el-table
+        :data="sysUserList"
+        style="width: 100%"
+        @selection-change="handleSelectionChange">
 
-  <!--表格开始-->
-  <el-table
-      :data="sysUserList"
-      style="width: 100%"
-      @selection-change="handleSelectionChange">
+      <el-table-column type="selection" :selectable="selectable" width="60"/>
+      <!--若 type 为 id，则该字段会自动增长-->
+      <el-table-column type="index" label="序号" width="100"/>
+      <el-table-column property="username" label="账号" width="180"/>
+      <el-table-column property="email" label="邮箱" width="200"/>
+      <el-table-column property="mobile" label="手机" width="240"/>
+      <el-table-column property="status" label="状态" width="120">
+        <template #default="scope">
+          <el-text class="mx-1" type="success" v-if="scope.row.status == 1">
+            正常
+          </el-text>
+          <el-text class="mx-1" type="danger" v-else>
+            禁用
+          </el-text>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
+        <template #default="scope">
+          <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
+          <el-button type="warning" @click="edit(scope.row.userId)">编辑</el-button>
+          <el-button type="danger" @click="del(scope.row.userId,scope.row.username)">删除</el-button>
+        </template>
+      </el-table-column>
 
-    <el-table-column type="selection" :selectable="selectable" width="60"/>
-    <!--若 type 为 id，则该字段会自动增长-->
-    <el-table-column type="index" label="序号" width="100"/>
-    <el-table-column property="username" label="账号" width="180"/>
-    <el-table-column property="email" label="邮箱" width="200"/>
-    <el-table-column property="mobile" label="手机" width="240"/>
-    <el-table-column property="status" label="状态" width="120">
-      <template #default="scope">
-        <el-text class="mx-1" type="success" v-if="scope.row.status == 1">
-          正常
-        </el-text>
-        <el-text class="mx-1" type="danger" v-else>
-          禁用
-        </el-text>
-      </template>
-    </el-table-column>
-    <el-table-column label="操作">
-      <template #default="scope">
-        <el-button type="primary" @click="view(scope.row.userId)">详情</el-button>
-        <el-button type="warning" @click="edit(scope.row.userId)">编辑</el-button>
-        <el-button type="danger" @click="del(scope.row.userId,scope.row.username)">删除</el-button>
-      </template>
-    </el-table-column>
-
-  </el-table>
-  <!--表格结束-->
-  <el-pagination
-      background
-      layout="prev, pager, next"
-      :page-size=myPageSize
-      :total=myTotal
-      @prev-click="toPage"
-      @current-change="toPage"
-      @next-click="toPage"/>
+    </el-table>
+    <!--表格结束-->
+    <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size=myPageSize
+        :total=myTotal
+        @prev-click="toPage"
+        @current-change="toPage"
+        @next-click="toPage"/>
+  </el-card>
   <!--这是新增用户的弹窗-->
   <el-dialog v-model="addUserWindows" :title="addUser.id>0?'编辑用户':'添加用户'" width="600" draggable>
     <el-form :model="addUser" label-width="110px" :rules="addUserRules" ref="addUserRefForm">
@@ -151,15 +154,19 @@ export default defineComponent({
       select: [],
       searchUser: {
         selectKey: "",
-        selectValue:"",
+        selectValue: "",
       },
       searchUserRules: {
         selectValue: [
           {max: 16, message: '查询条件在 16 个字符之内', trigger: 'blur'},
-          { pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/, message: '只允许输入中文、英文、数字、下划线或空格！', trigger: 'blur' }
+          {
+            pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ -]+$/,
+            message: '只允许输入中文、英文、数字、下划线或空格！',
+            trigger: 'blur'
+          }
         ],
       },
-      isSearch:false,
+      isSearch: false,
       // 定义 List 对象
       sysUserList: [{}],
       myPageSize: 0,
@@ -218,20 +225,20 @@ export default defineComponent({
     }
   },
   methods: {
-    submitSearch(){
+    submitSearch() {
       let selectKey = this.searchUser.selectKey;
       let selectValue = this.searchUser.selectValue;
 
-      if (selectKey === "" && selectValue === ""){
-        messageTip("请输入查询条件！","error")
+      if (selectKey === "" && selectValue === "") {
+        messageTip("请输入查询条件！", "error")
         return;
       }
-      if (selectKey === ""){
-        messageTip("请输入要查询的字段！","error")
+      if (selectKey === "") {
+        messageTip("请输入要查询的字段！", "error")
         return;
       }
-      if (selectValue === ""){
-        messageTip("请输入具体的模糊查询！","error")
+      if (selectValue === "") {
+        messageTip("请输入具体的模糊查询！", "error")
         return;
       }
       this.$refs.searchUserRefForm.validate((isValid) => {
@@ -241,7 +248,7 @@ export default defineComponent({
         }
       })
     },
-    reFlash(){
+    reFlash() {
       this.$router.go(0);
     },
     // 删除指定用户
@@ -407,24 +414,24 @@ export default defineComponent({
     },
     // 查询用户列表数据
     getData(current) {
-      if (this.isSearch){
+      if (this.isSearch) {
         // console.log(formData);
         doGet("/api/admin/sysUser/searchUser", {
           current: current,
-          selectKey:this.searchUser.selectKey,
-          selectValue:this.searchUser.selectValue,
+          selectKey: this.searchUser.selectKey,
+          selectValue: this.searchUser.selectValue,
         }).then((resp) => {
-          if (resp.data.code === 200){
+          if (resp.data.code === 200) {
             console.log(resp.data.data.list);
             this.sysUserList = resp.data.data.list;
             this.myTotal = resp.data.data.total;
             this.myPageSize = resp.data.data.pageSize;
-            messageTip("查询成功！","success");
-          }else{
-            messageTip("查询失败！","error");
+            messageTip("查询成功！", "success");
+          } else {
+            messageTip("查询失败！", "error");
           }
         })
-      }else {
+      } else {
         doGet("/api/admin/sysUser/sysUsers", {
           // 当前页
           current: current
@@ -476,5 +483,15 @@ export default defineComponent({
 .mySearch {
   margin-left: 10px;
   margin-top: 20px;
+}
+
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
 }
 </style>

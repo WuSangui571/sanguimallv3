@@ -1,90 +1,94 @@
 <template>
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <!--两个按钮-->
-    <el-button type="primary" @click="add">添加品牌</el-button>
-    <el-button type="danger" @click="batchDel">批量删除</el-button>
-    <div class="mySearch">
-      <el-form :model="searchBrand" :rules="searchBrandRules" ref="searchBrandRefForm">
-        <!--      <el-form :model="searchUser">-->
-        <el-form-item prop="selectValue">
-          <el-input
-              v-model="searchBrand.selectValue"
-              style="max-width: 600px"
-              placeholder="请输入具体的模糊查询"
-              class="input-with-select"
-              @keydown.enter.prevent
-              @keyup.enter="onKeyupEnter"
-              @compositionstart="onCompStart"
-              @compositionend="onCompEnd"
-          >
-            <template #append>
-              <el-button :icon="Search" @click="submitSearch"/>
-            </template>
-          </el-input>
-        </el-form-item>
-      </el-form>
-    </div>
-    <el-button type="success" @click="reFlash">重置</el-button>
-  </div>
-  <!--表格开始-->
-  <el-table
-      :data="brandList"
-      style="width: 100%"
-      @selection-change="handleSelectionChange">
-    <el-table-column type="selection" width="60"/>
-    <!--若 type 为 id，则该字段会自动增长-->
-    <el-table-column type="index" label="序号" width="60"/>
+  <div class="page-container">
+    <div class="toolbar">
+      <el-button type="primary" plain @click="add">添加品牌</el-button>
+      <el-button type="danger" plain @click="batchDel">批量删除</el-button>
 
-    <el-table-column label="LOGO" width="240">
-      <template #default="scope">
-        <el-image
-            :src="scope.row.logo"
-            fit="fill"
-        />
-      </template>
-    </el-table-column>
-    <el-table-column property="name" label="品牌名" width="120"/>
-    <el-table-column property="showStatus" label="显示状态" width="120">
-      <template #default="scope">
-        <el-switch
-            :model-value="scope.row.showStatus === 1"
-            @change="val => handleShowStatusChange(scope.row.brandId, val,scope.row.name)"
-            class="ml-2"
-            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-        />
-      </template>
-    </el-table-column>
-    <el-table-column property="firstLetter" label="检索首字母" width="100"/>
-    <el-table-column property="sort" label="排序" width="90"/>
-    <el-table-column property="descript" label="介绍" width="400">
-      <template #default="scope">
+      <div class="mySearch">
+        <el-form :model="searchBrand" :rules="searchBrandRules" ref="searchBrandRefForm">
+          <el-form-item prop="selectValue">
+            <el-input
+                v-model="searchBrand.selectValue"
+                style="max-width: 600px"
+                placeholder="请输入具体的模糊查询"
+                class="input-with-select"
+                @keydown.enter.prevent
+                @keyup.enter="onKeyupEnter"
+                @compositionstart="onCompStart"
+                @compositionend="onCompEnd"
+            >
+              <template #append>
+                <el-button :icon="Search" @click="submitSearch"/>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <el-button type="success" plain @click="reFlash">重置</el-button>
+    </div>
+    <el-card class="content-card" shadow="hover">
+      <div class="section-title">品牌列表</div>
+      <el-table
+          :data="brandList"
+          border
+          stripe
+          style="width: 100%"
+          @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="60"/>
+        <el-table-column type="index" label="序号" width="60"/>
+
+
+        <el-table-column label="LOGO" width="240">
+          <template #default="scope">
+            <el-image
+                :src="scope.row.logo"
+                fit="fill"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column property="name" label="品牌名" width="120"/>
+        <el-table-column property="showStatus" label="显示状态" width="120">
+          <template #default="scope">
+            <el-switch
+                :model-value="scope.row.showStatus === 1"
+                @change="val => handleShowStatusChange(scope.row.brandId, val,scope.row.name)"
+                class="ml-2"
+                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column property="firstLetter" label="检索首字母" width="100"/>
+        <el-table-column property="sort" label="排序" width="90"/>
+        <el-table-column property="descript" label="介绍" width="400">
+          <template #default="scope">
       <span
           class="clickable-text"
           @click="viewDescriptDetail(scope.row.name,scope.row.descript)"
       >
         {{ getDescript(scope.row.descript) }}
       </span>
-      </template>
-    </el-table-column>
+          </template>
+        </el-table-column>
 
-    <el-table-column label="操作">
-      <template #default="scope">
-        <el-button type="success" @click="relation(scope.row.brandId,scope.row.name)">关联分类</el-button>
-        <el-button type="warning" @click="edit(scope.row.brandId)">编辑</el-button>
-        <el-button type="danger" @click="del(scope.row.brandId,scope.row.name)">删除</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
-  <!--表格结束-->
-  <el-pagination
-      background
-      layout="prev, pager, next"
-      :page-size=myPageSize
-      :total=myTotal
-      @prev-click="toPage"
-      @current-change="toPage"
-      @next-click="toPage"/>
-
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button type="success" @click="relation(scope.row.brandId,scope.row.name)">关联分类</el-button>
+            <el-button type="warning" @click="edit(scope.row.brandId)">编辑</el-button>
+            <el-button type="danger" @click="del(scope.row.brandId,scope.row.name)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!--表格结束-->
+      <el-pagination
+          background
+          layout="prev, pager, next"
+          :page-size=myPageSize
+          :total=myTotal
+          @prev-click="toPage"
+          @current-change="toPage"
+          @next-click="toPage"/>
+    </el-card>
+  </div>
   <!--  </div>-->
   <!--这是新增品牌的弹窗-->
   <el-dialog v-model="addBrandWindows" :title="addBrand.id>0?'编辑品牌':'添加品牌'" width="600" draggable>
@@ -905,4 +909,14 @@ export default defineComponent({
 .myAddProductAttrGroupPage {
   margin-bottom: 10px;
 }
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
+}
 </style>
+

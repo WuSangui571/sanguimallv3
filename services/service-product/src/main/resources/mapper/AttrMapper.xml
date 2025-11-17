@@ -52,6 +52,11 @@
         from pms_attr
         where attr_id = #{attrId,jdbcType=BIGINT}
     </delete>
+    <delete id="deleteByIds" parameterType="java.lang.String">
+        delete
+        from pms_attr
+        where attr_id in (${ids,jdbcType=BIGINT})
+    </delete>
     <insert id="insert" keyColumn="attr_id" keyProperty="attrId"
             parameterType="com.sangui.sanguimall.product.model.entity.AttrDo" useGeneratedKeys="true">
         insert into pms_attr (attr_name, search_type, value_type,

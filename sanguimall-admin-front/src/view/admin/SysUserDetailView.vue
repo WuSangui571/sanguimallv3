@@ -1,63 +1,68 @@
 <template>
-  <el-button type="success" @click="goBack">返回</el-button>
-  <el-form :model="userDetail" class="my-form" label-width="130px">
-    <el-form-item label="ID">
-      <div class="div-item">
-        <!-- 写上 &nbsp; 是为了防止后面的数据未空，div 里空值-->
-        &nbsp;{{ userDetail.id }}
+  <div class="detail-layout">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">用户详情</div>
+        <div class="detail-subtitle">查看账号基础信息</div>
       </div>
-    </el-form-item>
+      <el-button type="primary" plain @click="goBack">返回</el-button>
+    </div>
+    <el-form :model="userDetail" class="my-form detail-card" label-width="130px">
+      <el-form-item label="ID">
+        <div class="div-item">
+          &nbsp;{{ userDetail.id }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="账户">
-      <div class="div-item">
-        &nbsp;{{ userDetail.username }}
-      </div>
-    </el-form-item>
+      <el-form-item label="账户">
+        <div class="div-item">
+          &nbsp;{{ userDetail.username }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="密码">
-      <div class="div-item">
-        <!--密码直接写死-->
-        &nbsp;******
-      </div>
-    </el-form-item>
+      <el-form-item label="密码">
+        <div class="div-item">
+          &nbsp;******
+        </div>
+      </el-form-item>
 
-    <el-form-item label="手机">
-      <div class="div-item">
-        &nbsp;{{ userDetail.mobile }}
-      </div>
-    </el-form-item>
+      <el-form-item label="手机">
+        <div class="div-item">
+          &nbsp;{{ userDetail.mobile }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="邮箱">
-      <div class="div-item">
-        &nbsp;{{ userDetail.email }}
-      </div>
-    </el-form-item>
+      <el-form-item label="邮箱">
+        <div class="div-item">
+          &nbsp;{{ userDetail.email }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="角色">
-      <div class="div-item">
-        &nbsp;{{ userDetail.roleVo.typeValue }}
-      </div>
-    </el-form-item>
+      <el-form-item label="角色">
+        <div class="div-item">
+          &nbsp;{{ userDetail.roleVo.typeValue }}
+        </div>
+      </el-form-item>
 
+      <el-form-item label="账户是否启用">
+        <div class="div-item">
+          &nbsp;{{ userDetail.status == '1' ? '启用' : '未启用' }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="账户是否启用">
-      <div class="div-item">
-        &nbsp;{{ userDetail.status == '1' ? '启用中' : '未启用' }}
-      </div>
-    </el-form-item>
+      <el-form-item label="账户创建时间">
+        <div class="div-item">
+          &nbsp;{{ userDetail.createTime }}
+        </div>
+      </el-form-item>
 
-    <el-form-item label="账户创建时间">
-      <div class="div-item">
-        &nbsp;{{ userDetail.createTime }}
-      </div>
-    </el-form-item>
-
-    <el-form-item label="创建人">
-      <div class="div-item">
-        &nbsp;{{ userDetail.createByVo.username }}
-      </div>
-    </el-form-item>
-  </el-form>
+      <el-form-item label="创建人">
+        <div class="div-item">
+          &nbsp;{{ userDetail.createByVo.username }}
+        </div>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -92,7 +97,7 @@ export default {
   },
   methods: {
     getData() {
-      // 获取 id。这里的 params 后面的 id 的名称，要与动态路由里设置的动态名称一样
+      // 获取 id。这里的 params 后面�?id 的名称，要与动态路由里设置的动态名称一�?
       let id = this.$route.params.id
       let url = "/api/admin/sysUser/" + id
       doGet(url, {}).then(resp => {
@@ -111,18 +116,54 @@ export default {
 </script>
 
 <style scoped>
-/*设置整个表格的样式*/
-.my-form {
-  /*设置左边的间距*/
-  padding-left: 30px;
+.detail-layout {
+  padding: 12px 14px 18px;
 }
-/*设置每个菜单项的值的样式*/
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.my-form {
+  padding: 4px 6px 2px;
+}
+
+.detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 12px 16px 4px;
+  color: var(--text-primary);
+}
+
+.my-form :deep(.el-form-item__label) {
+  color: var(--text-secondary);
+}
+
 .div-item {
-  /*设置背景色*/
-  background-color: azure;
-  /*设置宽度比例*/
+  background-color: var(--bg-aside);
+  color: var(--text-primary);
   width: 100%;
-  /*设置左边的间距*/
-  padding-left: 15px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  line-height: 1.7;
 }
 </style>

@@ -1,80 +1,83 @@
 <template>
-  <div class="m-4">
-    <el-select
-        v-model="selectedOneOptionsVo.id"
-        placeholder="请选择一级分类"
-        filterable
-        style="width: 240px"
-        @change="oneOptionsChange">
-      <el-option
-          v-for="item in oneOptionsData"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"/>
-    </el-select>
-    <el-select
-        v-model="selectedTwoOptionsVo.id"
-        placeholder="请选择二级分类"
-        filterable
-        style="width: 240px"
-        v-if="seeTwoOptionsFlag"
-        @change="twoOptionsChange">
-      <el-option
-          v-for="item in twoOptionsData"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"/>
-    </el-select>
-    <el-select
-        v-model="selectedThreeOptionsVo.id"
-        placeholder="请选择三级分类"
-        filterable
-        style="width: 240px"
-        v-if="seeThreeOptionsFlag"
-        @change="threeOptionsChange">
-      <el-option
-          v-for="item in threeOptionsData"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"/>
-    </el-select>
-    <el-button type="primary" v-if="seeTwoOptionsFlag" @click="reset">重置</el-button>
+  <div class="page-container">
+    <div class="toolbar">
+      <el-select
+          v-model="selectedOneOptionsVo.id"
+          placeholder="请选择一级分类"
+          filterable
+          style="width: 240px"
+          @change="oneOptionsChange">
+        <el-option
+            v-for="item in oneOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-select
+          v-model="selectedTwoOptionsVo.id"
+          placeholder="请选择二级分类"
+          filterable
+          style="width: 240px"
+          v-if="seeTwoOptionsFlag"
+          @change="twoOptionsChange">
+        <el-option
+            v-for="item in twoOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-select
+          v-model="selectedThreeOptionsVo.id"
+          placeholder="请选择三级分类"
+          filterable
+          style="width: 240px"
+          v-if="seeThreeOptionsFlag"
+          @change="threeOptionsChange">
+        <el-option
+            v-for="item in threeOptionsData"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"/>
+      </el-select>
+      <el-button type="primary" plain v-if="seeTwoOptionsFlag" @click="reset">重置</el-button>
+    </div>
+    <el-card class="content-card" shadow="hover" v-if="seeTable">
+      <div class="section-title">属性分组</div>
+      <div class="toolbar" style="gap: 10px; margin-bottom: 8px;">
+        <el-button type="primary" plain @click="add">添加属性分组</el-button>
+        <el-button type="danger" plain @click="batchDel">批量删除</el-button>
+      </div>
+      <el-table
+          :data="attrGroupList"
+          border
+          stripe
+          style="width: 100%"
+          @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="60"/>
+        <el-table-column type="index" label="序号" width="60"/>
+        <el-table-column property="attrGroupName" label="组名" width="120"/>
+        <el-table-column property="sort" label="排序" width="120"/>
+        <el-table-column property="descript" label="描述" width="120"/>
+        <el-table-column property="icon" label="组图标" width="240"/>
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button type="primary">关联</el-button>
+            <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
+            <el-button type="danger" @click="del(scope.row.id,scope.row.attrGroupName)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+          background
+          layout="prev, pager, next"
+          :page-size=myPageSize
+          :total=myTotal
+          @prev-click="toPage"
+          @current-change="toPage"
+          @next-click="toPage"/>
+    </el-card>
   </div>
-  <div class="myTable" v-if="seeTable">
-    <!--两个按钮-->
-    <el-button type="primary" @click="add">添加属性分组</el-button>
-    <el-button type="danger" @click="batchDel">批量删除</el-button>
-    <!--表格开始-->
-    <el-table
-        :data="attrGroupList"
-        style="width: 100%"
-        @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="60"/>
-      <!--若 type 为 id，则该字段会自动增长-->
-      <el-table-column type="index" label="序号" width="60"/>
-      <el-table-column property="attrGroupName" label="组名" width="120"/>
-      <el-table-column property="sort" label="排序" width="120"/>
-      <el-table-column property="descript" label="描述" width="120"/>
-      <el-table-column property="icon" label="组图标" width="240"/>
-      <el-table-column label="操作">
-        <template #default="scope">
-          <el-button type="primary">关联</el-button>
-          <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
-          <el-button type="danger" @click="del(scope.row.id,scope.row.attrGroupName)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!--表格结束-->
-    <el-pagination
-        background
-        layout="prev, pager, next"
-        :page-size=myPageSize
-        :total=myTotal
-        @prev-click="toPage"
-        @current-change="toPage"
-        @next-click="toPage"/>
-  </div>
-  <!--这是新增属性分组的弹窗-->
+<!--这是新增属性分组的弹窗-->
   <el-dialog v-model="addAttrGroupWindows" :title="addAttrGroup.id>0?'编辑属性分组':'添加属性分组'" width="600"
              draggable>
     <el-form :model="addAttrGroup" label-width="110px" :rules="addAttrGroupRules" ref="addAttrGroupRefForm">
@@ -433,5 +436,14 @@ export default {
 
 .el-pagination {
   margin-top: 20px;
+}
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
 }
 </style>

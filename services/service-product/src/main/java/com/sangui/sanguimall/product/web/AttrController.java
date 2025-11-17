@@ -2,9 +2,11 @@ package com.sangui.sanguimall.product.web;
 
 
 import com.github.pagehelper.PageInfo;
+import com.sangui.sanguimall.product.model.query.attr.AddAttrQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrEnableQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrSearchTypeQuery;
 import com.sangui.sanguimall.product.model.query.attr.EditAttrShowDescQuery;
+import com.sangui.sanguimall.product.model.vo.AttrDetailVo;
 import com.sangui.sanguimall.product.model.vo.AttrForAttrTypeOptionVo;
 import com.sangui.sanguimall.product.model.vo.AttrVo;
 import com.sangui.sanguimall.product.service.AttrService;
@@ -77,4 +79,36 @@ public class AttrController {
         List<AttrForAttrTypeOptionVo> list = attrService.getAttrTypeOption();
         return R.ok(list);
     }
+
+    @PostMapping("/attr")
+    public R addUser(AddAttrQuery addAttrQuery) {
+        int count = attrService.addAttr(addAttrQuery);
+        return count >= 1 ? R.ok() : R.fail();
+    }
+
+    @DeleteMapping("/attr/{id}")
+    public R delAttrById(@PathVariable("id") Long id) {
+        int count = attrService.delAttrById(id);
+        return count >= 1 ? R.ok() : R.fail();
+    }
+
+    @DeleteMapping("/attrs")
+    public R delAttrByIds(@RequestParam(value = "ids", required = false) String ids) {
+        int count = attrService.delAttrByIds(ids);
+        int len = ids == null ? 0 : ids.split(",").length;
+        return count >= len ? R.ok() : R.fail();
+    }
+
+    @GetMapping("/attr/{id}")
+    public R getAttrDetail(@PathVariable("id") Long id) {
+        AttrDetailVo attrDetailVo = attrService.getAttrDetail(id);
+        return attrDetailVo != null ? R.ok(attrDetailVo) : R.fail();
+    }
+
+    @PutMapping("/attr")
+    public R editAttr(AddAttrQuery addAttrQuery) {
+        int count = attrService.editAttr(addAttrQuery);
+        return count >= 1 ? R.ok() : R.fail();
+    }
+
 }

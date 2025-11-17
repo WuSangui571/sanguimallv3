@@ -1,12 +1,18 @@
 <template>
-  <!--两个按钮-->
-  <el-button type="primary" @click="add">添加规格参数</el-button>
-  <el-button type="danger">批量删除</el-button>
-  <!--表格开始-->
-  <el-table
-      :data="attrList"
-      style="width: 100%"
-      @selection-change="handleSelectionChange">
+  <div class="page-container">
+    <div class="toolbar">
+      <el-button type="primary" plain @click="add">添加规格参数</el-button>
+      <el-button type="danger" plain @click="batchDel">批量删除</el-button>
+    </div>
+    <el-card class="content-card" shadow="hover">
+      <div class="section-title">规格参数列表</div>
+      <el-table
+          :data="attrList"
+          border
+          stripe
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+          row-key="attrId">
     <el-table-column type="selection" width="60"/>
     <!--若 type 为 id，则该字段会自动增长-->
     <el-table-column type="index" label="序号" width="60"/>
@@ -71,7 +77,7 @@
 
     <el-table-column property="categoryVo.label" label="所属分类" width="220">
       <template #default="{ row }">
-        <template v-if="getCategoryPathList(row.categoryVo.id).length">
+        <template v-if="row.categoryVo && getCategoryPathList(row.categoryVo.id).length">
           <el-breadcrumb separator="/">
             <el-breadcrumb-item
                 v-for="(item, index) in getCategoryPathList(row.categoryVo.id)"
@@ -81,7 +87,8 @@
             </el-breadcrumb-item>
           </el-breadcrumb>
         </template>
-        <span v-else>加载中...</span>
+        <span v-else-if="row.categoryVo">加载中...</span>
+        <span v-else>暂无分类</span>
       </template>
     </el-table-column>
     <el-table-column property="showDesc" label="是否快速展示" width="110">
@@ -105,8 +112,10 @@
       </template>
     </el-table-column>
     <el-table-column label="操作">
-      <el-button type="warning">编辑</el-button>
-      <el-button type="danger">删除</el-button>
+      <template #default="scope">
+        <el-button type="warning" @click="edit(scope.row.attrId)">编辑</el-button>
+        <el-button type="danger" @click="del(scope.row.attrId,scope.row.attrName)">删除</el-button>
+      </template>
     </el-table-column>
   </el-table>
   <!--表格结束-->
@@ -118,6 +127,8 @@
       @prev-click="toPage"
       @current-change="toPage"
       @next-click="toPage"/>
+    </el-card>
+  </div>
 
   <!-- 查看完整标签的弹窗 -->
   <el-dialog
@@ -147,17 +158,21 @@
     </template>
   </el-dialog>
 
-
   <!--这是新增规格参数的弹窗-->
-  <el-dialog v-model="addAttrWindows" title="添加规格参数" width="600" draggable>
+  <el-dialog
+      v-model="addAttrWindows"
+      :title="addAttr.attrId > 0 ? '编辑规格参数' : '添加规格参数'"
+      width="600"
+      draggable>
     <el-form :model="addAttr" label-width="110px" :rules="addAttrRules" ref="addAttrRefForm">
-      <el-form-item label="所属分类" prop="selectedThreeOptionsVo.name">
+      <el-form-item label="所属分类" prop="categoryVo.id">
         <el-select
             v-model="selectedOneOptionsVo.id"
             placeholder="一级分类"
             filterable
             style="width: 120px"
-            @change="oneOptionsChange">
+            @change="oneOptionsChange"
+            :validate-event="false">
           <el-option
               v-for="item in oneOptionsData"
               :key="item.id"
@@ -170,6 +185,7 @@
             filterable
             style="width: 120px"
             v-if="seeTwoOptionsFlag"
+            :validate-event="false"
             @change="twoOptionsChange">
           <el-option
               v-for="item in twoOptionsData"
@@ -177,8 +193,9 @@
               :label="item.name"
               :value="item.id"/>
         </el-select>
+<!--      <el-form-item label="所属分类" prop="selectedThreeOptionsVo.id">-->
         <el-select
-            v-model="selectedThreeOptionsVo.id"
+            v-model="addAttr.categoryVo.id"
             placeholder="三级分类"
             filterable
             style="width: 120px"
@@ -247,9 +264,11 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item label="启用状态" prop="enable">
+
+
+      <el-form-item label="能否快速展示" prop="showDesc">
         <el-switch
-            v-model="addAttr.enable"
+            v-model="addAttr.showDesc"
             :active-value="1"
             :inactive-value="0"
             class="ml-2"
@@ -257,9 +276,9 @@
         />
       </el-form-item>
 
-      <el-form-item label="能否快速展示" prop="showDesc">
+      <el-form-item label="启用状态" prop="enable">
         <el-switch
-            v-model="addAttr.showDesc"
+            v-model="addAttr.enable"
             :active-value="1"
             :inactive-value="0"
             class="ml-2"
@@ -272,7 +291,7 @@
       <div class="dialog-footer">
         <el-button @click="addAttrWindows = false">取消</el-button>
         <el-button type="primary" @click="addAttrSubmit">
-          添加
+          {{ addAttr.attrId > 0 ? '保存' : '添加' }}
         </el-button>
       </div>
     </template>
@@ -280,8 +299,8 @@
 </template>
 
 <script>
-import {doGet, doPost, doPut} from "../../../http/HttpRequest.js";
-import {messageTip} from "../../../util/util.js";
+import {doDelete, doGet, doPost, doPut} from "../../../http/HttpRequest.js";
+import {messageConfirm, messageTip} from "../../../util/util.js";
 
 export default {
   name: "ProductAttrView",
@@ -289,6 +308,7 @@ export default {
     return {
       // 定义 List 对象
       attrList: [],
+      currentPage: 1,
       myPageSize: 0,
       myTotal: 0,
       // 新增：用来存 categoryId -> 分类路径
@@ -306,14 +326,17 @@ export default {
         attrName: "",
         searchType: 0,
         valueType: 1,
-        valueSelect: "",
+        valueSelect: [],
         icon: "",
         attrTypeVo: {
           id: "",
           name: "",
         },
         enable: 1,
-        categoryId: 0,
+        categoryVo: {
+          id:'',
+          name:"",
+        },
         showDesc: 0,
       },
       addAttrTypeOption: [],
@@ -336,15 +359,17 @@ export default {
         id: 0,
         name: "",
       }],
-      selectedThreeOptionsVo: {
-        id: "",
-        name: "",
-      },
+      // selectedThreeOptionsVo: {
+      //   id: "",
+      //   name: "",
+      // },
       threeOptionsData: [{
         id: 0,
         name: "",
       }],
       selectThreeOptionsOver: false,
+      selectedAttrIds: [],
+      selectedAttrNames: [],
       addAttrRules: {
         attrName: [
           {required: true, message: '属性名不能为空！', trigger: 'blur'},
@@ -352,7 +377,7 @@ export default {
         'attrTypeVo.id': [
           {required: true, message: '属性类型不能为空！', trigger: 'blur'},
         ],
-        'selectedThreeOptionsVo.name': [
+        'categoryVo.id': [
           {required: true, message: '务必选择所属分类！', trigger: 'blur'},
         ],
         // icon: [
@@ -364,11 +389,35 @@ export default {
   },
   methods: {
     // 勾选或者取消勾选时触发该函数
-    handleSelectionChange() {
-      // 完成批量删除模块功能时再写这个方法
+    handleSelectionChange(selectionDataArray) {
+      this.selectedAttrIds = []
+      this.selectedAttrNames = []
+      selectionDataArray.forEach(data => {
+        this.selectedAttrIds.push(data.attrId)
+        this.selectedAttrNames.push(data.attrName)
+      })
     },
     // 查询用户列表数据
-    getData(current) {
+    async getData(current) {
+      this.currentPage = current || 1;
+      this.attrList = [{
+        attrId: 0,
+        attrName: "",
+        searchType: 0,
+        valueType: 1,
+        valueSelect: "",
+        icon: "",
+        attrTypeVo: {
+          id: "",
+          name: "",
+        },
+        enable: 1,
+        categoryVo: {
+          id:'',
+          name:"",
+        },
+        showDesc: 0,
+      }];
       doGet("/api/product/attr/attrs", {
         // 当前页
         current: current
@@ -382,6 +431,7 @@ export default {
       })
     },
     toPage(current) {
+      this.currentPage = current;
       this.getData(current)
     },
     getAttrTypeValue(type) {
@@ -476,7 +526,7 @@ export default {
             let messageStr = "[" + attrName + "] 已改为 [不能检索] 状态！"
             messageTip(messageStr, "error");
           }
-          this.reload();
+          this.getData(this.currentPage);
         } else {
           messageTip("修改失败！未知错误！", "error");
         }
@@ -495,7 +545,7 @@ export default {
             let messageStr = "[" + attrName + "] 已改为 [不能快速展示] 状态！"
             messageTip(messageStr, "error");
           }
-          this.reload();
+          this.getData(this.currentPage);
         } else {
           messageTip("修改失败！未知错误！", "error");
         }
@@ -514,7 +564,7 @@ export default {
             let messageStr = "[" + attrName + "] 已改为 [不启用] 状态！"
             messageTip(messageStr, "error");
           }
-          this.reload();
+          this.getData(this.currentPage);
         } else {
           messageTip("修改失败！未知错误！", "error");
         }
@@ -532,8 +582,11 @@ export default {
     // 把 "黑色;白色;蓝色" 这种字符串拆成数组
     parseValueSelect(value) {
       if (!value) return []
+        if (Array.isArray(value)) {
+          return value.map(v => (v || "").trim()).filter(v => v)
+        }
       return value
-          .split(';')           // 用分号切分
+          .split(";")           // 用分号切开
           .map(v => v.trim())   // 去掉前后空格
           .filter(v => v)       // 过滤掉空字符串
     },
@@ -563,6 +616,77 @@ export default {
       // 打开弹窗
       this.tagDialogVisible = true
     },
+    batchDel() {
+      if (this.selectedAttrIds.length === 0) {
+        messageTip("请勾选要批量删除的规格参数！", "error")
+        return;
+      }
+      messageConfirm("确认批量删除 " + this.selectedAttrNames + " 吗？", "温馨提示").then(() => {
+        let ids = this.selectedAttrIds.join(",");
+        doDelete("/api/product/attr/attrs", {ids: ids}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已批量删除 " + this.selectedAttrNames, "success")
+            this.getData(this.currentPage);
+          } else {
+            messageTip("批量删除失败！原因：" + resp.data.msg, "error")
+          }
+        })
+      }).catch(() => {
+        messageTip("已取消批量删除！", "warning")
+      })
+    },
+    del(attrId, attrName) {
+      messageConfirm("确认删除 " + attrName + " 吗？", "温馨提示").then(() => {
+        let url = "/api/product/attr/attr/" + attrId;
+        doDelete(url, {}).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已删除 " + attrName, "success")
+            this.getData(this.currentPage);
+          } else {
+            messageTip("删除失败！原因：" + resp.data.msg, "error")
+          }
+        })
+      }).catch(() => {
+        messageTip("已取消删除！", "warning")
+      })
+    },
+    edit(id) {
+      this.resetAddAttrForm();
+      this.addAttrWindows = true;
+      this.loadEditData(id);
+    },
+    loadEditData(id) {
+      doGet(`/api/product/attr/attr/${id}`, {}).then((resp) => {
+        if (resp.data.code === 200) {
+          const data = resp.data.data;
+          this.addAttr.attrId = data.attrId;
+          this.addAttr.attrName = data.attrName;
+          this.addAttr.searchType = data.searchType;
+          this.addAttr.valueType = data.valueType;
+          this.addAttr.valueSelect = this.parseValueSelect(data.valueSelect);
+          this.addAttr.icon = data.icon;
+          this.addAttr.attrTypeVo.id = data.attrType;
+          this.addAttr.enable = data.enable;
+          this.addAttr.categoryVo.id = data.threeCategoryId || data.catelogId;
+          this.addAttr.showDesc = data.showDesc;
+
+          this.selectedOneOptionsVo.id = data.oneCategoryId || "";
+          this.selectedTwoOptionsVo.id = data.twoCategoryId || "";
+          this.seeTwoOptionsFlag = !!this.selectedOneOptionsVo.id;
+          this.seeThreeOptionsFlag = !!this.selectedTwoOptionsVo.id;
+
+          if (this.seeTwoOptionsFlag) {
+            this.getTwoOptionsData().then(() => {
+              if (this.seeThreeOptionsFlag) {
+                this.getThreeOptionsData().then(() => {
+                  this.selectThreeOptionsOver = true;
+                });
+              }
+            });
+          }
+        }
+      })
+    },
     // 提交新增规格参数
     addAttrSubmit() {
       this.$refs.addAttrRefForm.validate((isValid) => {
@@ -570,37 +694,86 @@ export default {
           // console.log("passed");
           let formData = new FormData();
           // 以键值对的形式写入数据
-          formData.append('attrNamee', this.addAttr.attrName);
+          formData.append('attrName', this.addAttr.attrName);
           //console.log("attrName=" + this.addAttr.attrName)
           formData.append('searchType', this.addAttr.searchType);
           //console.log("searchType=" + this.addAttr.searchType)
           formData.append('valueType', this.addAttr.valueType);
           //console.log("valueType=" + this.addAttr.valueType)
-          formData.append('valueSelect', this.addAttr.valueSelect);
-          //console.log("valueSelect=" + this.addAttr.valueSelect)
+          formData.append('valueSelect', Array.isArray(this.addAttr.valueSelect) ? this.addAttr.valueSelect.join(";") : this.addAttr.valueSelect);
+          formData.append('icon', this.addAttr.icon);
           formData.append('attrType', this.addAttr.attrTypeVo.id);
           //console.log("attrTypeVo.id=" + this.addAttr.attrTypeVo.id)
           formData.append('enable', this.addAttr.enable);
-          //console.log("enable=" + this.addAttr.enable)
-          formData.append('categoryId', this.selectedThreeOptionsVo.id);
-          console.log("categoryId=" + this.selectedThreeOptionsVo.id)
+          console.log("enable=" + this.addAttr.enable)
+          formData.append('catelogId', this.addAttr.categoryVo.id);
+          //console.log("catelogId=" + this.addAttr.categoryVo.id)
           formData.append('showDesc', this.addAttr.showDesc);
           //console.log("showDesc=" + this.addAttr.showDesc)
 
-          //console.log(formData);
-          // doPost("/api/user", formData).then((resp) => {
-          //   if (resp.data.code === 200){
-          //     messageTip("添加用户成功！","success");
-          //     this.addUserWindows = false;
-          //   }else{
-          //     messageTip("添加用户失败！","error");
-          //   }
-          // })
+          console.log(formData);
+          if (this.addAttr.attrId > 0) {
+            formData.append('id', this.addAttr.attrId);
+            doPut("/api/product/attr/attr", formData).then((resp) => {
+              if (resp.data.code === 200){
+                messageTip("编辑规格参数成功！","success");
+                this.addAttrWindows = false;
+                this.getData(this.currentPage);
+
+              }else{
+                messageTip("编辑规格参数失败！","error");
+              }
+            })
+          } else {
+            doPost("/api/product/attr/attr", formData).then((resp) => {
+              if (resp.data.code === 200){
+                messageTip("添加规格参数成功！","success");
+                this.resetAddAttrForm();
+                this.addAttrWindows = false;
+                this.getData(this.currentPage);
+
+              }else{
+                messageTip("添加规格参数失败！","error");
+              }
+            })
+          }
         }
       })
     },
+    // 重置新增规格参数表单数据
+    resetAddAttrForm() {
+      if (this.$refs.addAttrRefForm) {
+        this.$refs.addAttrRefForm.resetFields();
+      }
+      this.addAttr = {
+        attrId: 0,
+        attrName: "",
+        searchType: 0,
+        valueType: 1,
+        valueSelect: [],
+        icon: "",
+        attrTypeVo: {
+          id: "",
+          name: "",
+        },
+        enable: 1,
+        categoryVo: {
+          id:'',
+          name:"",
+        },
+        showDesc: 0,
+      };
+      this.seeTwoOptionsFlag = false;
+      this.seeThreeOptionsFlag = false;
+      this.selectThreeOptionsOver = false;
+      this.selectedOneOptionsVo = { id: "", name: "" };
+      this.selectedTwoOptionsVo = { id: "", name: "" };
+      this.twoOptionsData = [{ id: 0, name: "" }];
+      this.threeOptionsData = [{ id: 0, name: "" }];
+    },
     // 新增规格参数
     add() {
+      this.resetAddAttrForm();
       this.addAttrWindows = true
     },
 
@@ -621,7 +794,7 @@ export default {
           id: "",
           name: "",
         }];
-        this.selectedThreeOptionsVo = {
+        this.addAttr.categoryVo = {
           id: "",
           name: "",
         };
@@ -635,7 +808,10 @@ export default {
       this.getTwoOptionsData();
     },
     getTwoOptionsData() {
-      doGet("/api/product/category/two", {
+      if (!this.selectedOneOptionsVo.id) {
+        return Promise.resolve();
+      }
+      return doGet("/api/product/category/two", {
         oneOptionsId: this.selectedOneOptionsVo.id
       }).then(resp => {
         //console.log("二级菜单数据");
@@ -643,11 +819,12 @@ export default {
         if (resp.data.code === 200) {
           this.twoOptionsData = resp.data.data;
         }
+        return resp;
       })
     },
     twoOptionsChange() {
       if (this.seeThreeOptionsFlag === true) {
-        this.selectedThreeOptionsVo = {
+        this.addAttr.categoryVo = {
           id: "",
           name: "",
         };
@@ -661,18 +838,20 @@ export default {
       this.getThreeOptionsData();
     },
     getThreeOptionsData() {
-      doGet("/api/product/category/three", {
+      if (!this.selectedTwoOptionsVo.id) {
+        return Promise.resolve();
+      }
+      return doGet("/api/product/category/three", {
         twoOptionsId: this.selectedTwoOptionsVo.id
       }).then(resp => {
-        //console.log(resp.data.data);
         if (resp.data.code === 200) {
           this.threeOptionsData = resp.data.data;
         }
+        return resp;
       })
     },
     threeOptionsChange() {
       this.selectThreeOptionsOver = true;
-
     },
     reset() {
       this.seeTwoOptionsFlag = false;
@@ -690,7 +869,7 @@ export default {
         id: "",
         name: "",
       }];
-      this.selectedThreeOptionsVo = {
+      this.addAttr.categoryVo = {
         id: "",
         name: "",
       };
@@ -719,11 +898,31 @@ export default {
 </script>
 
 <style scoped>
-.el-table {
-  margin-top: 15px;
+.page-container {
+  min-height: calc(100vh - 120px);
 }
 
-.el-pagination {
-  margin-top: 20px;
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
+}
+
+.content-card {
+  margin-bottom: 12px;
+}
+
+.el-dialog {
+  border-radius: var(--radius-md);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 </style>

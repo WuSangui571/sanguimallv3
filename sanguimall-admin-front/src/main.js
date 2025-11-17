@@ -9,6 +9,7 @@ let app = createApp(App)
 import ElementPlus from 'element-plus'
 // 导入 element-plus 的 CSS 样式，不需要 from 子句
 import 'element-plus/dist/index.css'
+import './assets/theme.css'
 
 // 导入 icons
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'

@@ -1,11 +1,21 @@
 <template>
   <el-container>
     <!--左侧导航栏开始-->
-    <el-aside :width="isCollapse?'64px':'200px'">
+    <el-aside :width="isCollapse ? '72px' : '220px'">
       <div class="menu-title">
-        <el-icon class="fold-icon" @click="foldLeftSide">
-          <Fold/>
-        </el-icon>
+        <div class="brand" v-if="!isCollapse">
+          <el-icon class="brand-icon">
+            <Grid/>
+          </el-icon>
+          <span class="brand-name">Sanguimall</span>
+        </div>
+        <el-tooltip :content="isCollapse ? '展开导航' : '折叠导航'" placement="right">
+          <button type="button" class="collapse-btn" @click="foldLeftSide">
+            <el-icon>
+              <component :is="isCollapse ? Expand : Fold"/>
+            </el-icon>
+          </button>
+        </el-tooltip>
       </div>
       <!--侧导航条-->
       <el-menu
@@ -103,19 +113,29 @@
     <el-container class="right-side">
       <!--上导航条开始-->
       <el-header>
-        <el-dropdown :hide-on-click="false">
-          <span class="el-dropdown-link">
-<!--            此处动态获取用户姓名-->
-            {{ user.username }}
-            <el-icon class="el-icon--right"><arrow-down/></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="gotoMyInfo">我的资料</el-dropdown-item>
-              <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <div class="nav-bar">
+          <div class="theme-switch">
+            <el-switch
+                v-model="isDark"
+                :active-text="'暗色'"
+                :inactive-text="'亮色'"
+                inline-prompt
+                @change="toggleTheme"
+            />
+          </div>
+          <el-dropdown :hide-on-click="false">
+            <span class="el-dropdown-link">
+              {{ user.username }}
+              <el-icon class="el-icon--right"><arrow-down/></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="gotoMyInfo">我的资料</el-dropdown-item>
+                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </el-header>
       <!--上导航条结束-->
       <!--主区域开始-->
@@ -143,6 +163,7 @@ export default defineComponent({
   data() {
     return {
       isCollapse: false,
+      isDark: false,
       user: {
         username: "",
       },
@@ -168,6 +189,7 @@ export default defineComponent({
     // 执行这个方法，获取当前路径地址
     this.loadCurrentRouterPath();
     this.loadLoginUser();
+    this.initTheme();
   },
   methods: {
 
@@ -227,68 +249,118 @@ export default defineComponent({
       //alert(simplePath)
       this.currentRouterPath = simplePath;
     },
+    initTheme() {
+      const saved = localStorage.getItem("sanguimall-theme");
+      this.isDark = saved ? saved === "dark" : false;
+      this.applyTheme(this.isDark);
+    },
+    toggleTheme(val) {
+      this.applyTheme(val);
+      localStorage.setItem("sanguimall-theme", val ? "dark" : "light");
+    },
+    applyTheme(isDark) {
+      const mode = isDark ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", mode);
+    },
   },
 })
 </script>
 
 <style scoped>
-/* 设置上导航条的样式*/
+/* ?????????*/
 .el-header {
-  /* 设置背景颜色*/
-  background-color: azure;
-  /* 设置高度*/
-  height: 35px;
-  /* 设置行高与高度一致，即可上下居中*/
-  line-height: 35px;
+  background-color: var(--bg-header);
+  height: 56px;
+  line-height: 56px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* 底部版权信息条的样式*/
+/* ??????????*/
 .el-footer {
-  /* 设置背景颜色*/
-  background-color: azure;
-  /* 设置高度*/
+  background-color: var(--bg-header);
   height: 35px;
-  /* 设置行高与高度一致，即可上下居中*/
   line-height: 35px;
-  /* 设置文本左右居中*/
   text-align: center;
+  border-top: 1px solid var(--border-color);
 }
 
-/* 设置右侧三栏的样式*/
+/* ?????????*/
 .right-side {
-  /* 设置高度是撑满*/
   height: calc(100vh);
+  background: var(--bg-body);
 }
 
-/* 设置菜单标题的样式*/
+/* ????????? */
 .menu-title {
-  /* 设置背景颜色*/
-  background-color: azure;
-  /* 设置高度和右边一样*/
-  height: 35px;
-  /* 设置文本左右居中*/
-  text-align: center;
-  /* 设置行高与高度一致，即可上下居中*/
-  line-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--bg-aside);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-/* 设置菜单的样式*/
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
+}
+
+.brand-icon {
+  background: rgba(79, 139, 255, 0.12);
+  color: var(--accent);
+  padding: 7px;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 139, 255, 0.25);
+}
+
+.brand-name {
+  font-size: 15px;
+}
+
+/* ???????*/
 .el-menu {
-  /* 发现菜单天然有个 1px 的右边框，设置无边框*/
   border-right: 0;
+  padding: 6px 6px 10px;
 }
 
-/* 设置用户姓名下拉列表的样式*/
+/* ?????????????*/
 .el-dropdown {
-  /* 往右漂移，即放在最右边*/
   float: right;
-  /* 设置行高与高度一致，即可上下居中*/
   line-height: 35px;
 }
 
-/* 设置折叠图标的样式*/
-.fold-icon {
-  /* 使鼠标悬停图标时，鼠标变成手*/
+.collapse-btn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
   cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
+
+.collapse-btn:hover {
+  background: var(--bg-table-header);
+  transform: translateY(-1px);
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  height: 100%;
 }
 </style>

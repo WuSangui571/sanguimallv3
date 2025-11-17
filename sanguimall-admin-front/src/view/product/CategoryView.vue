@@ -1,40 +1,45 @@
 <template>
-  <div v-loading="loading" style="max-width: 400px;">
-    <el-tree
-        style="max-width: 400px"
-        :data="dataSource"
-        show-checkbox
-        node-key="id"
-        default-expand-all
-        :expand-on-click-node="false"
-        draggable
-        :allow-drop="allowDrop"
-        @node-drop="handleDrop"
-    >
-      <template #default="{ node, data }">
-        <div class="custom-tree-node">
-          <span>{{ node.label }}</span>
-          <div>
-            <el-button type="primary" link @click="append(data)" v-if="data.level !== 3">
-              添加
-            </el-button>
-            <el-button type="info" link @click="edit(node,data)">
-              编辑
-            </el-button>
-            <el-button
-                style="margin-left: 4px"
-                type="danger"
-                link
-                @click="remove(node, data)"
-            >
-              删除
-            </el-button>
-          </div>
-        </div>
-      </template>
-    </el-tree>
+  <div class="page-container">
+    <el-card class="content-card" shadow="hover">
+      <div class="section-title">分类维护</div>
+      <div v-loading="loading" style="max-width: 400px;">
+        <el-tree
+            style="max-width: 400px"
+            :data="dataSource"
+            show-checkbox
+            node-key="id"
+            default-expand-all
+            :expand-on-click-node="false"
+            draggable
+            :allow-drop="allowDrop"
+            @node-drop="handleDrop"
+        >
+          <template #default="{ node, data }">
+            <div class="custom-tree-node">
+              <span>{{ node.label }}</span>
+              <div>
+                <el-button type="primary" link @click="append(data)" v-if="data.level !== 3">
+                  添加
+                </el-button>
+                <el-button type="info" link @click="edit(node,data)">
+                  编辑
+                </el-button>
+                <el-button
+                    style="margin-left: 4px"
+                    type="danger"
+                    link
+                    @click="remove(node, data)"
+                >
+                  删除
+                </el-button>
+              </div>
+            </div>
+          </template>
+        </el-tree>
+      </div>
+    </el-card>
   </div>
-  <el-dialog v-model="askNewLabelTableVisible" title="添加新节点" width="500">
+<el-dialog v-model="askNewLabelTableVisible" title="添加新节点" width="500">
     <el-form :model="askNewLabelFrom">
       <el-form-item label="新节点名字">
         <el-input v-model="newLabel" autocomplete="off"/>
@@ -64,6 +69,21 @@
       </div>
     </template>
   </el-dialog>
+<!--  <el-backtop :bottom="100">-->
+<!--    <div-->
+<!--        style="-->
+<!--        height: 100%;-->
+<!--        width: 100%;-->
+<!--        background-color: var(&#45;&#45;el-bg-color-overlay);-->
+<!--        box-shadow: var(&#45;&#45;el-box-shadow-lighter);-->
+<!--        text-align: center;-->
+<!--        line-height: 40px;-->
+<!--        color: #1989fa;-->
+<!--      "-->
+<!--    >-->
+<!--      UP-->
+<!--    </div>-->
+<!--  </el-backtop>-->
 </template>
 
 <script>

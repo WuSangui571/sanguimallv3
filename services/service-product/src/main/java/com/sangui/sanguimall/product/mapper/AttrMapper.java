@@ -8,6 +8,8 @@ import java.util.List;
 public interface AttrMapper {
     int deleteByPrimaryKey(Long attrId);
 
+    int deleteByIds(String ids);
+
     int insert(AttrDo record);
 
     int insertSelective(AttrDo record);
