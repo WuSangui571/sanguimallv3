@@ -61,7 +61,7 @@
         <el-table-column property="icon" label="组图标" width="240"/>
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button type="primary">关联</el-button>
+            <el-button type="primary" @click="openRelationDialog(scope.row)">关联</el-button>
             <el-button type="warning" @click="edit(scope.row.id)">编辑</el-button>
             <el-button type="danger" @click="del(scope.row.id,scope.row.attrGroupName)">删除</el-button>
           </template>
@@ -103,6 +103,95 @@
         <el-button type="primary" @click="addAttrGroupSubmit">
           {{ addAttrGroup.id > 0 ? '编 辑' : '添 加' }}
         </el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <el-dialog
+      v-model="relationDialogVisible"
+      :title="`规格参数关联 - ${relationAttrGroup.name || ''}`"
+      width="780"
+      draggable>
+    <template #default>
+      <div class="dialog-toolbar">
+        <div class="toolbar-left">
+          <el-radio-group v-model="relationMode" size="small" @change="handleRelationModeChange">
+            <el-radio-button label="related">已关联</el-radio-button>
+            <el-radio-button label="available">可关联</el-radio-button>
+          </el-radio-group>
+        </div>
+        <div class="toolbar-right" v-if="relationMode === 'available'">
+          <el-button type="primary" size="small" plain @click="loadAvailableAttrs">刷新可关联</el-button>
+        </div>
+      </div>
+      <el-table
+          v-if="relationDialogVisible && relationMode === 'available' && (availableAttrList.length || relationLoading)"
+          v-loading="relationLoading"
+          :data="availableAttrList"
+          border
+          stripe
+          style="width: 100%"
+          row-key="attrId">
+        <el-table-column type="index" label="序号" width="80"/>
+        <el-table-column property="attrName" label="属性名" min-width="160"/>
+        <el-table-column property="attrType" label="属性类型" width="140">
+          <template #default="{ row }">
+            <el-tag
+                :type="getAttrTypeTagType(row.attrType)"
+                size="small"
+                effect="plain"
+                :disable-transitions="true">
+              {{ getAttrTypeValue(row.attrType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column property="categoryVo.label" label="所属分类" min-width="200">
+          <template #default="{ row }">
+            {{ row.categoryVo?.label || '加载中...' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160">
+          <template #default="{ row }">
+            <el-button type="primary" link @click="bindAttrToGroup(row.attrId)">关联到当前分组</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-table
+          v-else-if="relationDialogVisible && relationMode === 'related' && (relatedAttrList.length || relatedLoading)"
+          v-loading="relatedLoading"
+          :data="relatedAttrList"
+          border
+          stripe
+          style="width: 100%"
+          row-key="attrId">
+        <el-table-column type="index" label="序号" width="80"/>
+        <el-table-column property="attrName" label="属性名" min-width="160"/>
+        <el-table-column property="attrType" label="属性类型" width="140">
+          <template #default="{ row }">
+            <el-tag
+                :type="getAttrTypeTagType(row.attrType)"
+                size="small"
+                effect="plain"
+                :disable-transitions="true">
+              {{ getAttrTypeValue(row.attrType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column property="categoryVo.label" label="所属分类" min-width="200">
+          <template #default="{ row }">
+            {{ row.categoryVo?.label || '加载中...' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160">
+          <template #default="{ row }">
+            <el-button type="danger" link @click="removeRelation(row.attrId, row.attrName)">删除关联</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-else :description="relationMode === 'related' ? '暂无已关联的规格参数' : '暂无可关联的规格参数'"/>
+    </template>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="relationDialogVisible = false">关闭</el-button>
       </div>
     </template>
   </el-dialog>
@@ -178,6 +267,20 @@ export default {
           {max: 255, message: '组图标的长度在 255 之内！', trigger: 'blur'},
         ],
       },
+      relationDialogVisible: false,
+      relationLoading: false,
+      relationAttrGroup: {
+        id: 0,
+        name: "",
+      },
+      availableAttrList: [],
+      relatedLoading: false,
+      relatedAttrGroup: {
+        id: 0,
+        name: "",
+      },
+      relatedAttrList: [],
+      relationMode: "related",
       selectedIds: [],
       selectedAttrGroupNames: [],
     }
@@ -307,8 +410,125 @@ export default {
         }
       })
     },
+    openRelationDialog(row) {
+      if (!this.selectedThreeOptionsVo.id) {
+        messageTip("请选择三级分类后再进行关联！", "error");
+        return;
+      }
+      this.relationAttrGroup = {
+        id: row.id,
+        name: row.attrGroupName,
+      };
+      this.relationMode = "related";
+      this.relatedAttrGroup = {...this.relationAttrGroup};
+      this.relationDialogVisible = true;
+      this.loadRelatedAttrs();
+    },
+    loadAvailableAttrs() {
+      if (!this.selectedThreeOptionsVo.id) {
+        this.availableAttrList = [];
+        return;
+      }
+      this.relationLoading = true;
+      this.availableAttrList = [];
+      doGet("/api/product/attrGroupRelation/attrs", {
+        catelogId: this.selectedThreeOptionsVo.id,
+      }).then((resp) => {
+        if (resp.data.code === 200) {
+          this.availableAttrList = resp.data.data || [];
+        }
+      }).finally(() => {
+        this.relationLoading = false;
+      });
+    },
+    loadRelatedAttrs() {
+      if (!this.relatedAttrGroup.id) {
+        this.relatedAttrList = [];
+        return;
+      }
+      this.relatedLoading = true;
+      this.relatedAttrList = [];
+      doGet("/api/product/attrGroupRelation/related", {
+        attrGroupId: this.relatedAttrGroup.id,
+      }).then((resp) => {
+        if (resp.data.code === 200) {
+          this.relatedAttrList = resp.data.data || [];
+        }
+      }).finally(() => {
+        this.relatedLoading = false;
+      });
+    },
+    bindAttrToGroup(attrId) {
+      if (!this.relationAttrGroup.id) {
+        messageTip("请选择需要关联的分组！", "error");
+        return;
+      }
+      const formData = new FormData();
+      formData.append('attrGroupId', this.relationAttrGroup.id);
+      formData.append('attrId', attrId);
+      doPost("/api/product/attrGroupRelation/relation", formData).then((resp) => {
+        if (resp.data.code === 200) {
+          messageTip("关联成功！", "success");
+          if (this.relationMode === "available") {
+            this.loadAvailableAttrs();
+          }
+          this.loadRelatedAttrs();
+        } else {
+          messageTip("关联失败！", "error");
+        }
+      });
+    },
+    removeRelation(attrId, attrName) {
+      messageConfirm(`确认删除【${attrName}】与当前分组的关联吗？`, "温馨提示").then(() => {
+        const formData = new FormData();
+        formData.append('attrGroupId', this.relationAttrGroup.id);
+        formData.append('attrId', attrId);
+        doPost("/api/product/attrGroupRelation/relation/delete", formData).then((resp) => {
+          if (resp.data.code === 200) {
+            messageTip("已删除关联", "success");
+            this.loadRelatedAttrs();
+            if (this.relationMode === "available") {
+              this.loadAvailableAttrs();
+            }
+          } else {
+            messageTip("删除关联失败", "error");
+          }
+        });
+      }).catch(() => {
+        messageTip("已取消删除", "warning");
+      });
+    },
+    handleRelationModeChange(mode) {
+      if (mode === "available") {
+        this.loadAvailableAttrs();
+      } else {
+        this.loadRelatedAttrs();
+      }
+    },
+    getAttrTypeValue(type) {
+      const typeNum = Number(type);
+      if (typeNum === 0) {
+        return "销售属性";
+      } else if (typeNum === 1) {
+        return "基本属性";
+      } else if (typeNum === 2) {
+        return "销售/基本";
+      }
+      return "未知";
+    },
+    getAttrTypeTagType(type) {
+      const typeNum = Number(type);
+      if (typeNum === 0) {
+        return "success";
+      } else if (typeNum === 1) {
+        return "info";
+      } else if (typeNum === 2) {
+        return "warning";
+      }
+      return "";
+    },
     toPage(current) {
-      this.getData(current)
+      this.getTableData(current)
     },
     // 提交新增 属性分组
     addAttrGroupSubmit() {

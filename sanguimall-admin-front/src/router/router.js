@@ -66,6 +66,10 @@ let router = createRouter({
                     path: "product/attr/attr",
                     component: () => import("../view/product/attr/ProductAttrView.vue"),
                 },
+                {
+                    path: "member/level",
+                    component: () => import("../view/member/member-level.vue"),
+                },
             ]
         },
         // 这里添加之后的路由，格式如上，如{}，{}，在大括号里写具体的路径对应

@@ -3,6 +3,27 @@
     <div class="toolbar">
       <el-button type="primary" plain @click="add">添加规格参数</el-button>
       <el-button type="danger" plain @click="batchDel">批量删除</el-button>
+      <div class="mySearch">
+        <el-form :model="searchAttr" :rules="searchAttrRules" ref="searchAttrRefForm">
+          <el-form-item prop="selectValue">
+            <el-input
+                v-model="searchAttr.selectValue"
+                style="max-width: 600px"
+                placeholder="请输入具体的模糊查询"
+                class="input-with-select"
+                @keydown.enter.prevent
+                @keyup.enter="onKeyupEnter"
+                @compositionstart="onCompStart"
+                @compositionend="onCompEnd"
+            >
+              <template #append>
+                <el-button :icon="Search" @click="submitSearch"/>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <el-button type="success" plain @click="resetSearch">重置</el-button>
     </div>
     <el-card class="content-card" shadow="hover">
       <div class="section-title">规格参数列表</div>
@@ -301,9 +322,15 @@
 <script>
 import {doDelete, doGet, doPost, doPut} from "../../../http/HttpRequest.js";
 import {messageConfirm, messageTip} from "../../../util/util.js";
+import {Search} from "@element-plus/icons-vue";
 
 export default {
   name: "ProductAttrView",
+  computed: {
+    Search() {
+      return Search;
+    }
+  },
   data() {
     return {
       // 定义 List 对象
@@ -311,6 +338,17 @@ export default {
       currentPage: 1,
       myPageSize: 0,
       myTotal: 0,
+      searchAttr: {
+        selectValue: "",
+      },
+      searchAttrRules: {
+        selectValue: [
+          {min: 1, max: 50, message: '关键字长度应在 1 到 50 个字符之间！', trigger: 'blur'},
+          {pattern: /^[\u4e00-\u9fa5A-Za-z0-9_ /+]+$/, message: '只允许输入中文、英文、数字、下划线、空格、斜杠或加号！', trigger: 'blur'}
+        ]
+      },
+      isSearch: false,
+      isComposing: false,
       // 新增：用来存 categoryId -> 分类路径
       // 比如 { 3: "手机/手机通讯/手机", 5: "家用电器/..." }
       categoryPathMap: {},
@@ -418,17 +456,73 @@ export default {
         },
         showDesc: 0,
       }];
-      doGet("/api/product/attr/attrs", {
-        // 当前页
-        current: current
-      }).then(resp => {
-        if (resp.data.code === 200) {
-          console.log(resp)
-          this.attrList = resp.data.data.list;
-          this.myTotal = resp.data.data.total;
-          this.myPageSize = resp.data.data.pageSize;
+      if (this.isSearch) {
+        doGet("/api/product/attr/search", {
+          current: this.currentPage,
+          selectValue: this.searchAttr.selectValue,
+        }).then(resp => {
+          if (resp.data.code === 200) {
+            const list = resp.data.data.list || [];
+            if (list.length === 0) {
+              messageTip("未找到匹配数据，已为你恢复全部列表。", "warning");
+              this.isSearch = false;
+              // 恢复全量数据
+              this.getData(1);
+              return;
+            }
+            this.attrList = list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+            messageTip("查询成功！", "success");
+          } else {
+            messageTip("查询失败！", "error");
+          }
+        });
+      } else {
+        doGet("/api/product/attr/attrs", {
+          // 当前页
+          current: this.currentPage
+        }).then(resp => {
+          if (resp.data.code === 200) {
+            console.log(resp)
+            this.attrList = resp.data.data.list;
+            this.myTotal = resp.data.data.total;
+            this.myPageSize = resp.data.data.pageSize;
+          }
+        })
+      }
+    },
+    submitSearch() {
+      const keyword = (this.searchAttr.selectValue || "").trim();
+      if (keyword === "") {
+        messageTip("请输入查询条件！", "error");
+        return;
+      }
+      this.searchAttr.selectValue = keyword;
+      this.$refs.searchAttrRefForm.validate((isValid) => {
+        if (isValid) {
+          this.isSearch = true;
+          this.getData(1);
         }
       })
+    },
+    resetSearch() {
+      this.isSearch = false;
+      if (this.$refs.searchAttrRefForm) {
+        this.$refs.searchAttrRefForm.resetFields();
+      }
+      this.searchAttr.selectValue = "";
+      this.getData(1);
+    },
+    onCompStart() {
+      this.isComposing = true;
+    },
+    onCompEnd() {
+      this.isComposing = false;
+    },
+    onKeyupEnter() {
+      if (this.isComposing) return;
+      this.submitSearch();
     },
     toPage(current) {
       this.currentPage = current;
@@ -903,6 +997,10 @@ export default {
 }
 
 .toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-start;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -910,6 +1008,15 @@ export default {
   padding: 12px 12px;
   box-shadow: var(--shadow-soft);
   margin-bottom: 12px;
+}
+
+.mySearch {
+  margin: 0 8px;
+}
+
+.mySearch .el-form,
+.mySearch .el-form-item {
+  margin-bottom: 0;
 }
 
 .content-card {

@@ -21,6 +21,8 @@ import java.util.List;
 public interface AttrService {
     PageInfo<AttrVo> getAttrsByPage(Integer current);
 
+    PageInfo<AttrVo> searchAttrsByKeyword(Integer current, String keyword);
+
     int editAttrSearchType(EditAttrSearchTypeQuery editAttrSearchTypeQuery);
 
     int editAttrShowDesc(EditAttrShowDescQuery editAttrShowDescQuery);

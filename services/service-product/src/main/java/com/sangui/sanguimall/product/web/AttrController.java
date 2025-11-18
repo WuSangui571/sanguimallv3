@@ -44,6 +44,16 @@ public class AttrController {
         return R.ok(pageInfo);
     }
 
+    @GetMapping("/search")
+    public R searchAttrs(@RequestParam(value = "current", required = false) Integer current,
+                         @RequestParam(value = "selectValue") String selectValue) {
+        if (current == null) {
+            current = 1;
+        }
+        PageInfo<AttrVo> pageInfo = attrService.searchAttrsByKeyword(current, selectValue);
+        return R.ok(pageInfo);
+    }
+
     /**
      * 编辑 searchType 的是否显示
      * @param editAttrSearchTypeQuery 前端传过来的用户信息

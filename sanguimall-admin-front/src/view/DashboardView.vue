@@ -106,6 +106,39 @@
           </el-menu-item>
         </el-sub-menu>
 
+        <el-sub-menu index="5">
+          <template #title>
+            <el-icon>
+              <Avatar />
+            </el-icon>
+            <span>会员管理</span>
+          </template>
+          <el-menu-item index="/dashboard/member/xxxx">
+            <el-icon>
+              <Grid/>
+            </el-icon>
+            会员列表
+          </el-menu-item>
+          <el-menu-item index="/dashboard/member/level">
+            <el-icon>
+              <Histogram />
+            </el-icon>
+            会员等级
+          </el-menu-item>
+          <el-menu-item index="/dashboard/member/xxxxxxxxx">
+            <el-icon>
+              <TrendCharts />
+            </el-icon>
+            积分变化
+          </el-menu-item>
+          <el-menu-item index="/dashboard/member/xxxxxxxxxxx">
+            <el-icon>
+              <DataAnalysis />
+            </el-icon>
+            统计信息
+          </el-menu-item>
+        </el-sub-menu>
+
       </el-menu>
     </el-aside>
     <!--左侧导航栏结束-->
@@ -114,27 +147,40 @@
       <!--上导航条开始-->
       <el-header>
         <div class="nav-bar">
-          <div class="theme-switch">
-            <el-switch
-                v-model="isDark"
-                :active-text="'暗色'"
-                :inactive-text="'亮色'"
-                inline-prompt
-                @change="toggleTheme"
-            />
+          <div class="nav-left">
+            <el-breadcrumb separator="/" class="nav-breadcrumb">
+              <el-breadcrumb-item to="/dashboard/index">首页</el-breadcrumb-item>
+              <el-breadcrumb-item
+                  v-for="(item, index) in breadcrumbItems"
+                  :key="index"
+                  :to="item.to">
+                {{ item.label }}
+              </el-breadcrumb-item>
+            </el-breadcrumb>
           </div>
-          <el-dropdown :hide-on-click="false">
-            <span class="el-dropdown-link">
-              {{ user.username }}
-              <el-icon class="el-icon--right"><arrow-down/></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="gotoMyInfo">我的资料</el-dropdown-item>
-                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <div class="nav-actions">
+            <div class="theme-switch">
+              <el-switch
+                  v-model="isDark"
+                  :active-text="'暗色'"
+                  :inactive-text="'亮色'"
+                  inline-prompt
+                  @change="toggleTheme"
+              />
+            </div>
+            <el-dropdown :hide-on-click="false">
+              <span class="el-dropdown-link">
+                {{ user.username }}
+                <el-icon class="el-icon--right"><arrow-down/></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="gotoMyInfo">我的资料</el-dropdown-item>
+                  <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </div>
       </el-header>
       <!--上导航条结束-->
@@ -167,12 +213,42 @@ export default defineComponent({
       user: {
         username: "",
       },
-      // 当前访问路径，默认为空
       currentRouterPath: "",
-      // 控制该区域页面内容是否显示
       isRouterAlive: true,
       personalUrl: '',
-      // 当前访问路径，默认为空
+      breadcrumbConfig: {
+        "/dashboard/index": [{label: "系统首页"}],
+        "/dashboard/product/category": [
+          {label: "商品系统", to: "/dashboard/product/category"},
+          {label: "分类维护"}
+        ],
+        "/dashboard/product/brand": [
+          {label: "商品系统", to: "/dashboard/product/brand"},
+          {label: "品牌管理"}
+        ],
+        "/dashboard/product/attr/group": [
+          {label: "商品系统", to: "/dashboard/product/attr/group"},
+          {label: "平台属性", to: "/dashboard/product/attr/group"},
+          {label: "属性分组"}
+        ],
+        "/dashboard/product/attr/attr": [
+          {label: "商品系统", to: "/dashboard/product/attr/attr"},
+          {label: "平台属性", to: "/dashboard/product/attr/attr"},
+          {label: "规格参数"}
+        ],
+        "/dashboard/admin/sysUsers": [
+          {label: "用户管理", to: "/dashboard/admin/sysUsers"},
+          {label: "所有用户"}
+        ],
+        "/dashboard/admin/roles": [
+          {label: "用户管理", to: "/dashboard/admin/roles"},
+          {label: "角色管理"}
+        ],
+        "/dashboard/member/level": [
+          {label: "会员管理", to: "/dashboard/member/level"},
+          {label: "会员等级"}
+        ],
+      },
     }
   },
   provide() {
@@ -185,9 +261,23 @@ export default defineComponent({
       }
     }
   },
+  computed: {
+    breadcrumbItems() {
+      return this.buildBreadcrumb(this.$route.path);
+    }
+  },
+  watch: {
+    $route: {
+      immediate: true,
+      handler() {
+        this.syncRouteState();
+      }
+    },
+    personalUrl() {
+      this.syncRouteState();
+    }
+  },
   mounted() {
-    // 执行这个方法，获取当前路径地址
-    this.loadCurrentRouterPath();
     this.loadLoginUser();
     this.initTheme();
   },
@@ -231,23 +321,68 @@ export default defineComponent({
     foldLeftSide() {
       this.isCollapse = !this.isCollapse;
     },
-    // 获取当前路径地址
-    loadCurrentRouterPath() {
-      let path = this.$route.path;
-      //alert(path)
-      let pathArr = path.split("/");
-      // alert(pathArr)
-      // alert(pathArr[4])
-      let simplePath
-      if (pathArr[4] != undefined) {
-        // alert("yes!value=" + pathArr[4])
-        simplePath = '/' + pathArr[1] + '/' + pathArr[2] + '/' + pathArr[3] + '/' + pathArr[4];
-      }else {
-        // alert("no")
-        simplePath = '/' + pathArr[1] + '/' + pathArr[2] + '/' + pathArr[3]
+    syncRouteState() {
+      this.currentRouterPath = this.resolveMenuPath(this.$route.path);
+    },
+    resolveMenuPath(path) {
+      const menuIndexes = new Set([
+        "/dashboard/index",
+        "/dashboard/product/category",
+        "/dashboard/product/brand",
+        "/dashboard/product/attr/group",
+        "/dashboard/product/attr/attr",
+        "/dashboard/admin/sysUsers",
+        "/dashboard/admin/roles",
+        "/dashboard/member/level",
+      ]);
+      if (this.personalUrl && path.startsWith(this.personalUrl)) {
+        return this.personalUrl;
       }
-      //alert(simplePath)
-      this.currentRouterPath = simplePath;
+      if (path.startsWith("/dashboard/admin/sysUser/")) {
+        return "/dashboard/admin/sysUsers";
+      }
+      if (path.startsWith("/dashboard/admin/role/")) {
+        return "/dashboard/admin/roles";
+      }
+      const parts = path.split("/").filter(Boolean);
+      for (let len = parts.length; len >= 2; len--) {
+        const candidate = "/" + parts.slice(0, len).join("/");
+        if (menuIndexes.has(candidate)) {
+          return candidate;
+        }
+      }
+      return "/dashboard/index";
+    },
+    buildBreadcrumb(path) {
+      if (this.personalUrl && path.startsWith(this.personalUrl)) {
+        return [
+          {label: "用户管理", to: "/dashboard/admin/sysUsers"},
+          {label: "个人信息", to: this.personalUrl},
+        ];
+      }
+      if (path.startsWith("/dashboard/admin/sysUser/")) {
+        return [
+          {label: "用户管理", to: "/dashboard/admin/sysUsers"},
+          {label: "所有用户", to: "/dashboard/admin/sysUsers"},
+          {label: "用户详情"},
+        ];
+      }
+      if (path.startsWith("/dashboard/admin/role/")) {
+        return [
+          {label: "用户管理", to: "/dashboard/admin/sysUsers"},
+          {label: "角色管理", to: "/dashboard/admin/roles"},
+          {label: "角色详情"},
+        ];
+      }
+      const map = this.breadcrumbConfig;
+      const parts = path.split("/").filter(Boolean);
+      for (let len = parts.length; len >= 2; len--) {
+        const candidate = "/" + parts.slice(0, len).join("/");
+        if (map[candidate]) {
+          return map[candidate];
+        }
+      }
+      return [{label: "系统首页"}];
     },
     initTheme() {
       const saved = localStorage.getItem("sanguimall-theme");
@@ -267,12 +402,16 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* ?????????*/
+/* 顶部导航条 */
 .el-header {
   background-color: var(--bg-header);
   height: 56px;
   line-height: 56px;
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  box-sizing: border-box;
 }
 
 /* ??????????*/
@@ -290,18 +429,20 @@ export default defineComponent({
   background: var(--bg-body);
 }
 
-/* ????????? */
+/* 左侧品牌与折叠区域 */
 .menu-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   background-color: var(--bg-aside);
-  padding: 12px 14px;
+  height: 56px;
+  padding: 0 14px;
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 1;
+  box-sizing: border-box;
 }
 
 .brand {
@@ -338,29 +479,52 @@ export default defineComponent({
 }
 
 .collapse-btn {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
-  background: var(--bg-card);
+  background: var(--bg-header);
   color: var(--text-primary);
   transition: all 0.2s ease;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
+  box-shadow: none;
 }
 
 .collapse-btn:hover {
   background: var(--bg-table-header);
   transform: translateY(-1px);
+  border-color: var(--border-color);
 }
 
 .nav-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 12px;
   height: 100%;
+  width: 100%;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-breadcrumb {
+  color: var(--text-secondary);
+}
+
+.nav-breadcrumb :deep(.el-breadcrumb__inner.is-link) {
+  color: var(--text-secondary);
 }
 </style>

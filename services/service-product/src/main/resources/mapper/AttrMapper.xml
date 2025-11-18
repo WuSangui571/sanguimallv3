@@ -41,6 +41,59 @@
                  left join pms_category pc
                            on pa.catelog_id = pc.cat_id
     </select>
+    <select id="selectAttrsByKeyword" parameterType="map" resultMap="BaseResultMap2">
+        select pa.*, pc.cat_id relationCategoryId, pc.name relationCategoryName,
+               pc2.name level2Name, pc3.name level1Name
+        from pms_attr pa
+                 left join pms_category pc on pa.catelog_id = pc.cat_id
+                 left join pms_category pc2 on pc.parent_cid = pc2.cat_id
+                 left join pms_category pc3 on pc2.parent_cid = pc3.cat_id
+        <trim prefix="where" prefixOverrides="OR|AND">
+            <if test="keyword != null and keyword != ''">
+                (
+                pa.attr_name like concat('%', #{keyword}, '%')
+                or pa.value_select like concat('%', #{keyword}, '%')
+                or pc.name like concat('%', #{keyword}, '%')
+                or pc2.name like concat('%', #{keyword}, '%')
+                or pc3.name like concat('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="matchSingleValue == true">
+                or pa.value_type = 0
+            </if>
+            <if test="matchMultiValue == true">
+                or pa.value_type = 1
+            </if>
+            <if test="matchHybridType == true">
+                or pa.attr_type = 2
+            </if>
+            <if test="matchSaleType == true">
+                or pa.attr_type in (0, 2)
+            </if>
+            <if test="matchBaseType == true">
+                or pa.attr_type in (1, 2)
+            </if>
+        </trim>
+    </select>
+    <select id="selectUnrelatedAttrsByCatelogId" parameterType="java.lang.Long" resultMap="BaseResultMap2">
+        select pa.*, pc.cat_id relationCategoryId, pc.name relationCategoryName
+        from pms_attr pa
+                 left join pms_category pc on pa.catelog_id = pc.cat_id
+        where pa.catelog_id = #{catelogId,jdbcType=BIGINT}
+          and pa.attr_id not in (
+            select par.attr_id
+            from pms_attr_attrgroup_relation par
+                     join pms_attr_group pag on par.attr_group_id = pag.attr_group_id
+            where pag.catelog_id = #{catelogId,jdbcType=BIGINT}
+          )
+    </select>
+    <select id="selectRelatedAttrsByGroupId" parameterType="java.lang.Long" resultMap="BaseResultMap2">
+        select pa.*, pc.cat_id relationCategoryId, pc.name relationCategoryName
+        from pms_attr pa
+                 join pms_attr_attrgroup_relation par on pa.attr_id = par.attr_id
+                 left join pms_category pc on pa.catelog_id = pc.cat_id
+        where par.attr_group_id = #{attrGroupId,jdbcType=BIGINT}
+    </select>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

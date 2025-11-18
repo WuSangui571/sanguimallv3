@@ -14,6 +14,7 @@
     <modules>
         <module>common</module>
         <module>gateway</module>
+        <module>services</module>
     </modules>
     <groupId>com.sangui</groupId>
     <artifactId>sanguimallv3</artifactId>

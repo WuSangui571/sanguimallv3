@@ -1,13 +1,15 @@
 <template>
   <div class="detail-layout">
-    <div class="detail-header">
-      <div>
-        <div class="detail-title">用户详情</div>
-        <div class="detail-subtitle">查看账号基础信息</div>
-      </div>
+    <div class="toolbar">
       <el-button type="primary" plain @click="goBack">返回</el-button>
     </div>
     <el-form :model="userDetail" class="my-form detail-card" label-width="130px">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title">用户详情</div>
+          <div class="detail-subtitle">查看账号基础信息</div>
+        </div>
+      </div>
       <el-form-item label="ID">
         <div class="div-item">
           &nbsp;{{ userDetail.id }}
@@ -78,15 +80,15 @@ export default {
         password: '',
         mobile: '',
         email: '',
-        status:'',
+        status: '',
         createTime: '',
         createUserId: '',
         createByVo: {
           id: '',
           username: '',
         },
-        roleVo:{
-          id:'',
+        roleVo: {
+          id: '',
           typeValue: "",
         }
       },
@@ -165,5 +167,15 @@ export default {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   line-height: 1.7;
+}
+
+.toolbar {
+  justify-content: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 12px;
 }
 </style>

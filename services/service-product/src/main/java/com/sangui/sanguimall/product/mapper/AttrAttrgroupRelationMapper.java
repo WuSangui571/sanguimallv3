@@ -11,7 +11,11 @@ public interface AttrAttrgroupRelationMapper {
 
     AttrAttrgroupRelationDo selectByPrimaryKey(Long id);
 
+    AttrAttrgroupRelationDo selectByAttrId(Long attrId);
+
     int updateByPrimaryKeySelective(AttrAttrgroupRelationDo record);
 
     int updateByPrimaryKey(AttrAttrgroupRelationDo record);
+
+    int deleteByAttrGroupAndAttr(Long attrGroupId, Long attrId);
 }

@@ -48,38 +48,34 @@ public class AttrServiceImpl implements AttrService {
         // 2. 查询数据
         List<AttrDo> doList = attrMapper.selectAttrsByPage();
 
-        // 3. 获取 PageInfo 对象，封装分页信息
-        PageInfo<AttrDo> pageInfoDo = new PageInfo<>(doList);
+        // 3. 封装分页数据
+        return buildPageInfo(doList);
+    }
 
-        // 4. 转换为 Vo 列表
-        List<AttrVo> voList = new ArrayList<>();
-        //System.out.println("myDoList=" + doList);
-        for (AttrDo attrDo : doList) {
-            voList.add(attrConverter.doToVo(attrDo));
+    @Override
+    public PageInfo<AttrVo> searchAttrsByKeyword(Integer current, String keyword) {
+        PageHelper.startPage(current, Constants.PAGE_SIZE);
+
+        String keywordTrimmed = keyword == null ? "" : keyword.trim();
+        if (keywordTrimmed.isEmpty()) {
+            return getAttrsByPage(current);
         }
-        //System.out.println("myVoList=" + voList);
 
-        // 5. 封装分页数据到 PageInfo
-        PageInfo<AttrVo> pageInfoVo = new PageInfo<>(voList);
+        boolean matchSingleValue = containsAnyIgnoreCase(keywordTrimmed, "单值", "单选", "单值型", "单");
+        boolean matchMultiValue = containsAnyIgnoreCase(keywordTrimmed, "多值", "多选", "多值型", "多");
+        boolean matchHybridType = containsAnyIgnoreCase(keywordTrimmed, "销售+基本", "销售＋基本", "基本+销售", "基本＋销售");
+        boolean matchSaleType = !matchHybridType && containsAnyIgnoreCase(keywordTrimmed, "销售", "sale");
+        boolean matchBaseType = !matchHybridType && containsAnyIgnoreCase(keywordTrimmed, "基本", "base");
 
-        // 手动传递分页信息
-        // 总记录数
-        pageInfoVo.setTotal(pageInfoDo.getTotal());
-        // 总页数
-        pageInfoVo.setPages(pageInfoDo.getPages());
-        // 当前页
-        pageInfoVo.setPageNum(pageInfoDo.getPageNum());
-        // 每页数据量
-        pageInfoVo.setPageSize(pageInfoDo.getPageSize());
-        // 起始行
-        pageInfoVo.setStartRow(pageInfoDo.getStartRow());
-        // 结束行
-        pageInfoVo.setEndRow(pageInfoDo.getEndRow());
-        // 当前页的数据条数
-        pageInfoVo.setSize(pageInfoDo.getSize());
-
-        // 6. 返回最终的分页数据
-        return pageInfoVo;
+        List<AttrDo> doList = attrMapper.selectAttrsByKeyword(
+                keywordTrimmed,
+                matchSingleValue,
+                matchMultiValue,
+                matchHybridType,
+                matchSaleType,
+                matchBaseType
+        );
+        return buildPageInfo(doList);
     }
 
     @Override
@@ -219,5 +215,38 @@ public class AttrServiceImpl implements AttrService {
     @Override
     public int delAttrByIds(String ids) {
         return attrMapper.deleteByIds(ids);
+    }
+
+    private PageInfo<AttrVo> buildPageInfo(List<AttrDo> doList) {
+        PageInfo<AttrDo> pageInfoDo = new PageInfo<>(doList);
+
+        List<AttrVo> voList = new ArrayList<>();
+        for (AttrDo attrDo : doList) {
+            voList.add(attrConverter.doToVo(attrDo));
+        }
+
+        PageInfo<AttrVo> pageInfoVo = new PageInfo<>(voList);
+        pageInfoVo.setTotal(pageInfoDo.getTotal());
+        pageInfoVo.setPages(pageInfoDo.getPages());
+        pageInfoVo.setPageNum(pageInfoDo.getPageNum());
+        pageInfoVo.setPageSize(pageInfoDo.getPageSize());
+        pageInfoVo.setStartRow(pageInfoDo.getStartRow());
+        pageInfoVo.setEndRow(pageInfoDo.getEndRow());
+        pageInfoVo.setSize(pageInfoDo.getSize());
+
+        return pageInfoVo;
+    }
+
+    private boolean containsAnyIgnoreCase(String source, String... keywords) {
+        if (source == null) {
+            return false;
+        }
+        String lowerSource = source.toLowerCase();
+        for (String keyword : keywords) {
+            if (keyword != null && !keyword.isEmpty() && lowerSource.contains(keyword.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
