@@ -94,7 +94,11 @@
           <el-input-number v-model="form.growthPoint" :min="0" :max="999999" controls-position="right" style="width: 220px"/>
         </el-form-item>
         <el-form-item label="默认等级" prop="defaultLevel">
-          <el-switch v-model="form.defaultLevel" active-text="是" inactive-text="否"/>
+          <el-switch
+              v-model="form.defaultLevel"
+              :disabled="defaultSwitchDisabled"
+              active-text="开"
+              inactive-text="关"/>
         </el-form-item>
         <el-form-item label="免邮门槛" prop="freeFreightPoint">
           <el-input-number v-model="form.freeFreightPoint" :min="0" :max="999999" :precision="2" :step="1" controls-position="right" style="width: 220px"/>
@@ -157,6 +161,21 @@ const privilegeConfig = [
 const defaultLevelName = computed(() => {
   const level = memberLevels.value.find(item => item.defaultLevel);
   return level ? level.name : "";
+});
+
+const hasDefaultLevel = computed(() => memberLevels.value.some(item => item.defaultLevel));
+
+const defaultSwitchDisabled = computed(() => {
+  if (!hasDefaultLevel.value) {
+    return false;
+  }
+  if (form.value.id) {
+    const current = memberLevels.value.find(item => item.id === form.value.id);
+    if (current && current.defaultLevel) {
+      return false;
+    }
+  }
+  return true;
 });
 
 const dialogTitle = computed(() => form.value.id ? "编辑会员等级" : "新增会员等级");

@@ -113,7 +113,7 @@
             </el-icon>
             <span>会员管理</span>
           </template>
-          <el-menu-item index="/dashboard/member/xxxx">
+          <el-menu-item index="/dashboard/member/list">
             <el-icon>
               <Grid/>
             </el-icon>
@@ -125,17 +125,11 @@
             </el-icon>
             会员等级
           </el-menu-item>
-          <el-menu-item index="/dashboard/member/xxxxxxxxx">
+          <el-menu-item index="/dashboard/member/points">
             <el-icon>
               <TrendCharts />
             </el-icon>
             积分变化
-          </el-menu-item>
-          <el-menu-item index="/dashboard/member/xxxxxxxxxxx">
-            <el-icon>
-              <DataAnalysis />
-            </el-icon>
-            统计信息
           </el-menu-item>
         </el-sub-menu>
 
@@ -244,9 +238,17 @@ export default defineComponent({
           {label: "用户管理", to: "/dashboard/admin/roles"},
           {label: "角色管理"}
         ],
+        "/dashboard/member/list": [
+          {label: "会员管理", to: "/dashboard/member/list"},
+          {label: "会员列表"}
+        ],
         "/dashboard/member/level": [
           {label: "会员管理", to: "/dashboard/member/level"},
           {label: "会员等级"}
+        ],
+        "/dashboard/member/points": [
+          {label: "会员管理", to: "/dashboard/member/points"},
+          {label: "积分变化"}
         ],
       },
     }
@@ -333,7 +335,9 @@ export default defineComponent({
         "/dashboard/product/attr/attr",
         "/dashboard/admin/sysUsers",
         "/dashboard/admin/roles",
+        "/dashboard/member/list",
         "/dashboard/member/level",
+        "/dashboard/member/points",
       ]);
       if (this.personalUrl && path.startsWith(this.personalUrl)) {
         return this.personalUrl;

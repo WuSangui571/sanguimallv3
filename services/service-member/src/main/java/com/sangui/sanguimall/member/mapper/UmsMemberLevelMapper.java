@@ -17,4 +17,6 @@ public interface UmsMemberLevelMapper {
     int updateByPrimaryKeySelective(UmsMemberLevel record);
 
     int updateByPrimaryKey(UmsMemberLevel record);
+
+    int countDefaultLevel(Long excludeId);
 }

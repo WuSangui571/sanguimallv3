@@ -32,8 +32,12 @@ public class UmsMemberLevelController {
         if (validateMsg != null) {
             return R.fail(validateMsg);
         }
-        int count = memberLevelService.create(query);
-        return count >= 1 ? R.ok() : R.fail();
+        try {
+            int count = memberLevelService.create(query);
+            return count >= 1 ? R.ok() : R.fail();
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        }
     }
 
     @PutMapping
@@ -42,8 +46,12 @@ public class UmsMemberLevelController {
         if (validateMsg != null) {
             return R.fail(validateMsg);
         }
-        int count = memberLevelService.update(query);
-        return count >= 1 ? R.ok() : R.fail();
+        try {
+            int count = memberLevelService.update(query);
+            return count >= 1 ? R.ok() : R.fail();
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        }
     }
 
     private String validate(MemberLevelSaveQuery query, boolean requireId) {

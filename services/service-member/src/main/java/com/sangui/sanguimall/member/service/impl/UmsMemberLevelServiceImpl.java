@@ -34,6 +34,9 @@ public class UmsMemberLevelServiceImpl implements UmsMemberLevelService {
 
     @Override
     public int create(MemberLevelSaveQuery query) {
+        if (isDefault(query.getDefaultStatus()) && hasOtherDefault(null)) {
+            throw new IllegalArgumentException("仅允许存在一个默认等级");
+        }
         UmsMemberLevel level = toEntity(query);
         level.setId(null);
         return memberLevelMapper.insertSelective(level);
@@ -41,6 +44,9 @@ public class UmsMemberLevelServiceImpl implements UmsMemberLevelService {
 
     @Override
     public int update(MemberLevelSaveQuery query) {
+        if (isDefault(query.getDefaultStatus()) && hasOtherDefault(query.getId())) {
+            throw new IllegalArgumentException("已存在默认等级，无法重复设置");
+        }
         UmsMemberLevel level = toEntity(query);
         return memberLevelMapper.updateByPrimaryKeySelective(level);
     }
@@ -77,5 +83,13 @@ public class UmsMemberLevelServiceImpl implements UmsMemberLevelService {
 
     private boolean asBool(Byte value) {
         return value != null && value == 1;
+    }
+
+    private boolean isDefault(Byte value) {
+        return value != null && value == 1;
+    }
+
+    private boolean hasOtherDefault(Long excludeId) {
+        return memberLevelMapper.countDefaultLevel(excludeId) > 0;
     }
 }

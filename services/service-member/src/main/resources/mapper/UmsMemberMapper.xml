@@ -31,6 +31,35 @@
     from ums_member
     where id = #{id,jdbcType=BIGINT}
   </select>
+  <select id="selectByCondition" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ums_member
+    <where>
+      <if test="keyword != null and keyword != ''">
+        (
+        username like concat('%', #{keyword}, '%')
+        or nickname like concat('%', #{keyword}, '%')
+        or mobile like concat('%', #{keyword}, '%')
+        or email like concat('%', #{keyword}, '%')
+        )
+      </if>
+      <if test="levelId != null">
+        and level_id = #{levelId,jdbcType=BIGINT}
+      </if>
+      <if test="status != null">
+        and `status` = #{status,jdbcType=TINYINT}
+      </if>
+    </where>
+    order by id asc
+  </select>
+  <select id="selectByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ums_member
+    where username = #{username,jdbcType=CHAR}
+    limit 1
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from ums_member
     where id = #{id,jdbcType=BIGINT}

@@ -12,6 +12,18 @@
   <sql id="Base_Column_List">
     id, member_id, create_time, change_count, note, source_tyoe
   </sql>
+  <resultMap id="HistoryWithMemberMap" type="com.sangui.sanguimall.member.model.vo.IntegrationChangeHistoryVo">
+    <id column="id" property="id"/>
+    <result column="member_id" property="memberId"/>
+    <result column="username" property="username"/>
+    <result column="nickname" property="nickname"/>
+    <result column="mobile" property="mobile"/>
+    <result column="email" property="email"/>
+    <result column="change_count" property="changeCount"/>
+    <result column="note" property="note"/>
+    <result column="source_tyoe" property="sourceType"/>
+    <result column="create_time" property="createTime"/>
+  </resultMap>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
@@ -95,4 +107,27 @@
       source_tyoe = #{sourceTyoe,jdbcType=TINYINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <select id="selectWithMember" parameterType="java.lang.String" resultMap="HistoryWithMemberMap">
+    select h.id,
+      h.member_id,
+      h.create_time,
+      h.change_count,
+      h.note,
+      h.source_tyoe,
+      m.username,
+      m.nickname,
+      m.mobile,
+      m.email
+    from ums_integration_change_history h
+      left join ums_member m on m.id = h.member_id
+    <where>
+      <if test="keyword != null and keyword != ''">
+        (m.username like concat('%', #{keyword}, '%')
+        or m.nickname like concat('%', #{keyword}, '%')
+        or m.mobile like concat('%', #{keyword}, '%')
+        or m.email like concat('%', #{keyword}, '%'))
+      </if>
+    </where>
+    order by h.id asc
+  </select>
 </mapper>

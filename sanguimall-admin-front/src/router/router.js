@@ -67,8 +67,16 @@ let router = createRouter({
                     component: () => import("../view/product/attr/ProductAttrView.vue"),
                 },
                 {
+                    path: "member/list",
+                    component: () => import("../view/member/member-list.vue"),
+                },
+                {
                     path: "member/level",
                     component: () => import("../view/member/member-level.vue"),
+                },
+                {
+                    path: "member/points",
+                    component: () => import("../view/member/member-points-history.vue"),
                 },
             ]
         },

@@ -9,7 +9,6 @@
         <el-tree
             class="category-tree"
             :data="dataSource"
-            show-checkbox
             highlight-current
             node-key="id"
             default-expand-all
@@ -256,10 +255,18 @@ export default defineComponent({
 }
 
 .category-tree {
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--el-fill-color-light);
-  border: 1px dashed var(--border-color);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 0 0 1px rgba(79, 139, 255, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+:global([data-theme="dark"]) .category-tree {
+  background: rgba(17, 24, 39, 0.88);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .custom-tree-node {
@@ -268,7 +275,7 @@ export default defineComponent({
 }
 
 .custom-tree-node:hover {
-  background: var(--el-fill-color-lighter);
+  background: rgba(79, 139, 255, 0.08);
 }
 
 .node-main {

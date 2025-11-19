@@ -150,4 +150,12 @@
       note = #{note,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <select id="countDefaultLevel" parameterType="java.lang.Long" resultType="int">
+    select count(1)
+    from ums_member_level
+    where default_status = 1
+    <if test="excludeId != null">
+      and id != #{excludeId,jdbcType=BIGINT}
+    </if>
+  </select>
 </mapper>
